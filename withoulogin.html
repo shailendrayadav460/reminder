@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>RemindMe — Birthday & Anniversary Tracker</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --p1:#4F46E5;--p2:#9333EA;--c1:#0EA5E9;--c2:#06B6D4;
+  --bg:#F8F7FF;--surf:#FFFFFF;--bdr:rgba(79,70,229,0.1);
+  --t1:#111827;--t2:#6B7280;--t3:#9CA3AF;
+  --pink:#EC4899;--cyan:#0EA5E9;--violet:#8B5CF6;--green:#10B981;
+  --shadow:0 2px 12px rgba(79,70,229,0.08);
+  --icon-stroke:#4F46E5;
+  --icon-bg:#EEF2FF;
+  --icon-bg-hover:#DDD6FE;
+}
+html[data-theme="dark"]{
+  --bg:#0F0E1A;--surf:#1C1A2E;--bdr:rgba(139,92,246,0.15);
+  --t1:#F3F4F6;--t2:#A0A0B0;--t3:#6B7280;
+  --shadow:0 2px 12px rgba(0,0,0,0.3);
+  --icon-stroke:#A78BFA;
+  --icon-bg:#2D2A4A;
+  --icon-bg-hover:#3D3A5A;
+}
+html,body{height:100%;font-family:-apple-system,'SF Pro Text','Inter',sans-serif;background:var(--bg);color:var(--t1);font-size:13px;-webkit-font-smoothing:antialiased;transition:background 0.3s,color 0.3s}
+body{display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:0}
+
+/* ── APP SHELL ── */
+.app{
+  width:100%;max-width:430px;
+  min-height:100vh;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  position:relative;
+  margin:0 auto;
+  transition:background 0.3s;
+}
+
+/* ── TOP NAV ── */
+.topnav{
+  background:rgba(255,255,255,0.96);
+  padding:14px 18px 12px;
+  border-bottom:0.5px solid var(--bdr);
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  transition:background 0.3s,border-color 0.3s;
+}
+html[data-theme="dark"] .topnav{background:rgba(28,26,46,0.96)}
+.logo{
+  font-size:17px;font-weight:800;letter-spacing:-0.5px;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.topnav-right{display:flex;gap:8px;align-items:center}
+.icon-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--icon-bg);border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;padding:0;transition:background 0.2s;
+}
+.icon-btn:hover{background:var(--icon-bg-hover)}
+.icon-btn svg{width:16px;height:16px;stroke:var(--icon-stroke);fill:none;stroke-width:2}
+
+/* Dark mode toggle specific */
+.theme-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--icon-bg);border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;padding:0;transition:background 0.2s;
+  position:relative;
+}
+.theme-btn:hover{background:var(--icon-bg-hover)}
+.theme-btn .icon-sun,.theme-btn .icon-moon{
+  position:absolute;width:16px;height:16px;
+  stroke:var(--icon-stroke);fill:none;stroke-width:2;
+  transition:opacity 0.25s,transform 0.3s;
+}
+.theme-btn .icon-sun{opacity:1;transform:rotate(0deg)}
+.theme-btn .icon-moon{opacity:0;transform:rotate(-90deg)}
+html[data-theme="dark"] .theme-btn .icon-sun{opacity:0;transform:rotate(90deg)}
+html[data-theme="dark"] .theme-btn .icon-moon{opacity:1;transform:rotate(0deg)}
+
+/* ── SCROLL AREA ── */
+.scroll{flex:1;overflow-y:auto;padding:16px 16px 80px;-webkit-overflow-scrolling:touch}
+
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── BOTTOM NAV ── */
+.bottomnav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;
+  background:rgba(255,255,255,0.97);
+  border-top:0.5px solid var(--bdr);
+  display:flex;z-index:100;
+  padding:6px 0 max(8px, env(safe-area-inset-bottom));
+  box-shadow:0 -4px 20px rgba(79,70,229,0.06);
+  transition:background 0.3s;
+}
+html[data-theme="dark"] .bottomnav{background:rgba(28,26,46,0.97)}
+.bnav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;padding:4px 0;border:none;background:none;
+  transition:transform 0.15s;-webkit-tap-highlight-color:transparent;
+}
+.bnav-item:active{transform:scale(0.88)}
+.bnav-item svg{width:21px;height:21px;stroke:var(--t3);fill:none;stroke-width:1.8;transition:stroke 0.2s}
+.bnav-item span{font-size:9px;font-weight:600;color:var(--t3);letter-spacing:0.3px;transition:color 0.2s}
+.bnav-item.active svg{stroke:var(--p1)}
+.bnav-item.active span{color:var(--p1)}
+.bnav-dot{width:4px;height:4px;border-radius:50%;background:var(--p1);margin:0 auto;display:none}
+.bnav-item.active .bnav-dot{display:block}
+
+/* ── HERO BANNER ── */
+.hero{
+  background:linear-gradient(135deg,var(--p1) 0%,var(--p2) 100%);
+  border-radius:20px;padding:22px 20px 20px;margin-bottom:16px;
+  position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;top:-45px;right:-30px;width:130px;height:130px;background:rgba(255,255,255,0.07);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-30px;left:5px;width:90px;height:90px;background:rgba(255,255,255,0.05);border-radius:50%}
+.hero h2{color:#fff;font-size:18px;font-weight:800;line-height:1.3;position:relative;z-index:1}
+.hero p{color:rgba(255,255,255,0.82);font-size:12px;margin-top:6px;position:relative;z-index:1}
+.hero-cta{
+  margin-top:16px;display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);
+  color:#fff;font-size:12px;font-weight:700;padding:8px 15px;
+  border-radius:20px;cursor:pointer;position:relative;z-index:1;
+  transition:background 0.2s;-webkit-tap-highlight-color:transparent;
+}
+.hero-cta:hover{background:rgba(255,255,255,0.28)}
+.hero-cta svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}
+.stat-box{background:var(--surf);border:0.5px solid var(--bdr);border-radius:14px;padding:13px 8px;text-align:center;box-shadow:var(--shadow);transition:background 0.3s,border-color 0.3s}
+.stat-num{
+  font-size:24px;font-weight:800;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.stat-lbl{font-size:9px;color:var(--t3);font-weight:600;letter-spacing:0.4px;margin-top:3px}
+
+/* ── FILTER BAR ── */
+.filter-bar{
+  display:flex;gap:7px;margin-bottom:16px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;padding-bottom:2px;
+  scrollbar-width:none;
+}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 13px;border-radius:20px;
+  font-size:11px;font-weight:700;
+  border:0.5px solid var(--bdr);
+  background:var(--surf);color:var(--t2);
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  transition:all 0.18s;
+  -webkit-tap-highlight-color:transparent;
+}
+.filter-chip:hover{border-color:var(--p1);color:var(--p1)}
+.filter-chip.active{
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  color:#fff;border-color:transparent;
+  box-shadow:0 3px 10px rgba(79,70,229,0.25);
+}
+.filter-chip svg{width:11px;height:11px;fill:none;stroke-width:2.2;flex-shrink:0}
+.filter-chip.active svg{stroke:#fff}
+.filter-chip:not(.active) svg{stroke:var(--t2)}
+.filter-chip:not(.active):hover svg{stroke:var(--p1)}
+.filter-chip .chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.filter-chip.active .chip-dot{background:rgba(255,255,255,0.85)}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px}
+
+/* ── EVENT CARD ── */
+.ecard{
+  background:var(--surf);border:0.5px solid var(--bdr);border-radius:16px;
+  padding:13px 14px 13px 11px;margin-bottom:10px;
+  display:flex;gap:11px;align-items:flex-start;
+  cursor:pointer;transition:transform 0.15s,box-shadow 0.2s,background 0.3s;
+  box-shadow:var(--shadow);
+}
+.ecard:active{transform:scale(0.98)}
+.ecard:hover{box-shadow:0 6px 24px rgba(79,70,229,0.14)}
+.ecard-stripe{width:4px;border-radius:4px;flex-shrink:0;align-self:stretch;min-height:44px}
+.stripe-bday{background:linear-gradient(180deg,#F472B6,#EC4899)}
+.stripe-anni{background:linear-gradient(180deg,#38BDF8,#0EA5E9)}
+.stripe-other{background:linear-gradient(180deg,#A78BFA,#8B5CF6)}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.av-pk{background:#FDF2F8;color:#9D174D}
+.av-bl{background:#EFF6FF;color:#1E40AF}
+.av-vl{background:#F5F3FF;color:#5B21B6}
+.av-gr{background:#F0FDF4;color:#166534}
+.av-or{background:#FFF7ED;color:#C2410C}
+html[data-theme="dark"] .av-pk{background:#3D1A2E;color:#F9A8D4}
+html[data-theme="dark"] .av-bl{background:#1A2640;color:#93C5FD}
+html[data-theme="dark"] .av-vl{background:#2A1A40;color:#C4B5FD}
+html[data-theme="dark"] .av-gr{background:#1A3020;color:#86EFAC}
+html[data-theme="dark"] .av-or{background:#3D2010;color:#FED7AA}
+.ecard-body{flex:1;min-width:0}
+.ecard-name{font-size:14px;font-weight:700;color:var(--t1)}
+.ecard-sub{font-size:10px;color:var(--t3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ecard-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:5px}
+.ecard-date{font-size:10px;color:var(--t2)}
+.badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px}
+.badge-bday{background:#FDF2F8;color:#9D174D}
+.badge-anni{background:#EFF6FF;color:#1E40AF}
+.badge-other{background:#F5F3FF;color:#5B21B6}
+html[data-theme="dark"] .badge-bday{background:#3D1A2E;color:#F9A8D4}
+html[data-theme="dark"] .badge-anni{background:#1A2640;color:#93C5FD}
+html[data-theme="dark"] .badge-other{background:#2A1A40;color:#C4B5FD}
+.pill{font-size:9px;font-weight:700;padding:3px 8px;border-radius:8px}
+.pill-soon{background:#FFFBEB;color:#B45309}
+.pill-today{background:#F0FDF4;color:#166534}
+.pill-later{background:#F9FAFB;color:var(--t3)}
+html[data-theme="dark"] .pill-soon{background:#3D2A00;color:#FCD34D}
+html[data-theme="dark"] .pill-today{background:#0A2A15;color:#86EFAC}
+html[data-theme="dark"] .pill-later{background:#1C1A2E;color:var(--t3)}
+.send-btn{
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  color:#fff;border:none;font-size:9px;font-weight:700;
+  padding:5px 11px;border-radius:8px;cursor:pointer;white-space:nowrap;
+  transition:opacity 0.2s;
+}
+.send-btn:hover{opacity:0.88}
+
+/* ── CALENDAR ── */
+.cal-wrap{background:var(--surf);border:0.5px solid var(--bdr);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow);transition:background 0.3s}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cal-title{font-size:16px;font-weight:800;color:var(--t1)}
+.cal-nav{display:flex;gap:8px}
+.cal-nav-btn{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--icon-bg);border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--p1);font-size:16px;font-weight:700;
+  transition:background 0.2s;
+}
+.cal-nav-btn:hover{background:var(--icon-bg-hover)}
+.cal-days-hdr{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px}
+.cal-day-hdr{text-align:center;font-size:9px;font-weight:700;color:var(--t3);padding:4px 0;letter-spacing:0.5px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-cell{
+  aspect-ratio:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  border-radius:10px;cursor:pointer;position:relative;
+  transition:background 0.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cal-cell:hover{background:var(--icon-bg)}
+.cal-num{font-size:12px;font-weight:600;color:var(--t1);line-height:1}
+.cal-cell.other-month .cal-num{color:var(--t3)}
+.cal-cell.today-cell{background:linear-gradient(135deg,var(--p1),var(--p2))}
+.cal-cell.today-cell .cal-num{color:#fff;font-weight:800}
+.cal-cell.selected{background:var(--icon-bg);border:1.5px solid var(--p1)}
+.cal-cell.selected .cal-num{color:var(--p1);font-weight:800}
+.cal-cell.today-cell.selected{background:linear-gradient(135deg,var(--p1),var(--p2));border:2px solid #fff}
+.cal-cell.today-cell.selected .cal-num{color:#fff}
+.cal-dots{display:flex;gap:2px;justify-content:center;position:absolute;bottom:3px}
+.cal-dot{width:4px;height:4px;border-radius:50%}
+.cd-bday{background:var(--pink)}
+.cd-anni{background:var(--cyan)}
+.cd-other{background:var(--violet)}
+.today-cell .cal-dot{background:rgba(255,255,255,0.85)!important}
+
+/* ── DAY DETAIL PANEL ── */
+.day-panel{background:var(--surf);border:0.5px solid var(--bdr);border-radius:16px;padding:15px;margin-bottom:13px;box-shadow:var(--shadow);transition:background 0.3s}
+.day-panel-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.day-panel-title{font-size:13px;font-weight:800;color:var(--t1)}
+.day-cnt-badge{font-size:9px;background:var(--icon-bg);color:var(--p1);padding:3px 9px;border-radius:8px;font-weight:700}
+.day-panel-empty{text-align:center;padding:18px;color:var(--t3);font-size:12px}
+.dp-event{display:flex;gap:11px;align-items:center;padding:10px 0;border-top:0.5px solid rgba(79,70,229,0.07)}
+.dp-event:first-child{border-top:none}
+.dp-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dp-name{font-size:13px;font-weight:700;color:var(--t1)}
+.dp-meta{font-size:10px;color:var(--t3);margin-top:1px}
+.dp-send{
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  color:#fff;border:none;font-size:9px;font-weight:700;
+  padding:5px 10px;border-radius:8px;cursor:pointer;margin-left:auto;
+  transition:opacity 0.2s;flex-shrink:0;
+}
+.dp-send:hover{opacity:0.88}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2);font-weight:600}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── FORM ── */
+.form-wrap{background:var(--surf);border:0.5px solid var(--bdr);border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:var(--shadow);transition:background 0.3s}
+.form-wrap h3{font-size:15px;font-weight:800;color:var(--t1);margin-bottom:16px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--t2);margin-bottom:5px;letter-spacing:0.4px;text-transform:uppercase}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 13px;
+  border:0.5px solid rgba(79,70,229,0.2);border-radius:11px;
+  font-size:13px;font-family:inherit;
+  background:#FAFAFE;color:var(--t1);
+  transition:border-color 0.2s,background 0.2s;
+  -webkit-appearance:none;appearance:none;
+}
+html[data-theme="dark"] .field input,html[data-theme="dark"] .field select,html[data-theme="dark"] .field textarea{background:#151325;color:var(--t1);border-color:rgba(139,92,246,0.25)}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--p1);background:#fff;
+  box-shadow:0 0 0 3px rgba(79,70,229,0.08);
+}
+html[data-theme="dark"] .field input:focus,html[data-theme="dark"] .field select:focus{background:#1C1A2E}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.submit-btn{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  color:#fff;border:none;border-radius:13px;
+  font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;
+  transition:opacity 0.2s,transform 0.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.submit-btn:hover{opacity:0.92;transform:translateY(-1px)}
+.submit-btn:active{transform:scale(0.98)}
+
+/* ── REMINDERS ── */
+.rem-item{background:var(--surf);border:0.5px solid var(--bdr);border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);transition:background 0.3s}
+.rem-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.rem-info{flex:1;min-width:0}
+.rem-name{font-size:13px;font-weight:700;color:var(--t1)}
+.rem-sub{font-size:10px;color:var(--t2);margin-top:2px}
+.rem-right{text-align:right;flex-shrink:0}
+.rem-days{font-size:12px;color:var(--t2);font-weight:700}
+.rem-status{font-size:9px;font-weight:700;margin-top:2px}
+.webhook-card{background:var(--surf);border:0.5px solid var(--bdr);border-radius:16px;padding:15px;box-shadow:var(--shadow);transition:background 0.3s}
+.wh-row{display:flex;justify-content:space-between;align-items:center}
+.wh-lbl{font-size:13px;font-weight:700;color:var(--t1)}
+.wh-sub{font-size:10px;color:var(--t3);margin-top:3px}
+.wh-badge{font-size:9px;font-weight:700;padding:4px 11px;border-radius:10px;background:#F0FDF4;color:#166534}
+.wh-stat{margin-top:10px;font-size:11px;color:var(--t2)}
+
+/* ── SETTINGS ── */
+.set-group{background:var(--surf);border:0.5px solid var(--bdr);border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow);transition:background 0.3s}
+.set-group-lbl{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:0.8px;text-transform:uppercase;padding:12px 15px 7px}
+.set-row{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-top:0.5px solid var(--bdr);cursor:pointer}
+.set-row:first-of-type{border-top:none}
+.set-lbl{font-size:13px;font-weight:600;color:var(--t1)}
+.set-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.set-chev{color:var(--t3);font-size:15px;font-weight:300}
+.tog{position:relative;width:46px;height:26px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-track{position:absolute;inset:0;background:#E5E7EB;border-radius:13px;transition:background 0.25s;cursor:pointer}
+.tog-track::before{content:'';position:absolute;width:20px;height:20px;top:3px;left:3px;background:#fff;border-radius:50%;transition:transform 0.25s;box-shadow:0 1px 4px rgba(0,0,0,0.18)}
+.tog input:checked+.tog-track{background:linear-gradient(135deg,var(--p1),var(--p2))}
+.tog input:checked+.tog-track::before{transform:translateX(20px)}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--t3)}
+.empty-state svg{width:48px;height:48px;stroke:var(--t3);fill:none;stroke-width:1.2;margin-bottom:12px;opacity:0.5}
+.empty-state h4{font-size:14px;font-weight:700;color:var(--t2);margin-bottom:4px}
+.empty-state p{font-size:12px}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:78px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:#111827;color:#fff;font-size:12px;font-weight:600;
+  padding:10px 20px;border-radius:22px;z-index:999;
+  opacity:0;transition:opacity 0.3s,transform 0.3s;
+  pointer-events:none;white-space:nowrap;max-width:90vw;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+}
+html[data-theme="dark"] .toast{background:#E5E7EB;color:#111827}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── FOOTER ── */
+.app-footer{text-align:center;padding:10px 0 4px;font-size:10px;color:var(--t3)}
+
+/* ── RESPONSIVE ── */
+@media(min-width:431px){
+  .app{border-radius:24px;margin:20px auto;min-height:auto;box-shadow:0 8px 48px rgba(79,70,229,0.12)}
+  .bottomnav{border-radius:0 0 24px 24px}
+}
+@media(max-width:360px){
+  .field-row{grid-template-columns:1fr}
+  .hero h2{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="logo">🎉 RemindMe</div>
+    <div class="topnav-right">
+      <!-- Dark/Light toggle -->
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+        <!-- Sun icon (light mode) -->
+        <svg class="icon-sun" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <!-- Moon icon (dark mode) -->
+        <svg class="icon-moon" viewBox="0 0 24 24">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" onclick="switchTab('add')" title="Add event">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button class="icon-btn" onclick="switchTab('reminders')" title="Alerts">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ══ HOME SCREEN ══ -->
+  <div id="sc-home" class="screen active">
+    <div class="scroll">
+      <div class="hero">
+        <h2>Never Miss a<br>Special Moment ✨</h2>
+        <p>All your birthdays &amp; anniversaries in one place</p>
+        <button class="hero-cta" onclick="switchTab('add')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Event
+        </button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-num" id="stat-total">0</div>
+          <div class="stat-lbl">Total</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-month">0</div>
+          <div class="stat-lbl">This Month</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-week">0</div>
+          <div class="stat-lbl">This Week</div>
+        </div>
+      </div>
+
+      <!-- ── FILTER BAR ── -->
+      <div class="filter-bar" id="home-filter-bar">
+        <button class="filter-chip active" data-filter="all" onclick="setFilter('all')">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+          All
+        </button>
+        <button class="filter-chip" data-filter="Birthday" onclick="setFilter('Birthday')">
+          <span class="chip-dot" style="background:#EC4899"></span>
+          Birthdays
+        </button>
+        <button class="filter-chip" data-filter="Anniversary" onclick="setFilter('Anniversary')">
+          <span class="chip-dot" style="background:#0EA5E9"></span>
+          Anniversaries
+        </button>
+        <button class="filter-chip" data-filter="Other" onclick="setFilter('Other')">
+          <span class="chip-dot" style="background:#8B5CF6"></span>
+          Other
+        </button>
+        <button class="filter-chip" data-filter="week" onclick="setFilter('week')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          This Week
+        </button>
+        <button class="filter-chip" data-filter="today" onclick="setFilter('today')">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Today
+        </button>
+      </div>
+
+      <div class="sec-lbl" id="home-sec-label">Coming Up Soon</div>
+      <div id="home-events"></div>
+    </div>
+  </div>
+
+  <!-- ══ CALENDAR SCREEN ══ -->
+  <div id="sc-calendar" class="screen">
+    <div class="scroll">
+      <div class="cal-wrap">
+        <div class="cal-header">
+          <div class="cal-title" id="cal-title">May 2025</div>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)" title="Previous">&#8249;</button>
+            <button class="cal-nav-btn" onclick="changeMonth(1)" title="Next">&#8250;</button>
+          </div>
+        </div>
+        <div class="cal-days-hdr">
+          <div class="cal-day-hdr">S</div>
+          <div class="cal-day-hdr">M</div>
+          <div class="cal-day-hdr">T</div>
+          <div class="cal-day-hdr">W</div>
+          <div class="cal-day-hdr">T</div>
+          <div class="cal-day-hdr">F</div>
+          <div class="cal-day-hdr">S</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div>Birthday</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>Anniversary</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--violet)"></div>Other</div>
+      </div>
+
+      <div id="day-detail"></div>
+
+      <div class="sec-lbl" id="month-events-label">Events this month</div>
+      <div id="cal-month-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ ADD SCREEN ══ -->
+  <div id="sc-add" class="screen">
+    <div class="scroll">
+      <div class="form-wrap">
+        <h3>Add New Event</h3>
+
+        <div class="field">
+          <label>Person Name *</label>
+          <input type="text" id="f-name" placeholder="e.g. Priya Sharma" autocomplete="off">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Relationship *</label>
+            <select id="f-rel">
+              <option value="">Select</option>
+              <option>Family</option>
+              <option>Friend</option>
+              <option>Friend of Family</option>
+              <option>Friend of Friend</option>
+              <option>Colleague</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Event Type *</label>
+            <select id="f-type">
+              <option value="">Select</option>
+              <option value="Birthday">Birthday</option>
+              <option value="Anniversary">Anniversary</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" id="f-date">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Phone (with code)</label>
+            <input type="tel" id="f-phone" placeholder="+91 98765 43210">
+          </div>
+          <div class="field">
+            <label>Remind (days before)</label>
+            <input type="number" id="f-days" value="1" min="0" max="30">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="f-email" placeholder="name@example.com">
+        </div>
+
+        <div class="field">
+          <label>Notes</label>
+          <input type="text" id="f-notes" placeholder="Gift ideas, preferences...">
+        </div>
+
+        <button class="submit-btn" onclick="saveEvent()">Save Event</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REMINDERS SCREEN ══ -->
+  <div id="sc-reminders" class="screen">
+    <div class="scroll">
+      <div class="sec-lbl">Active Alerts — Next 30 Days</div>
+      <div id="rem-list"></div>
+
+      <div style="margin-top:8px">
+        <div class="sec-lbl">Webhook Status</div>
+        <div class="webhook-card">
+          <div class="wh-row">
+            <div>
+              <div class="wh-lbl">n8n Webhook</div>
+              <div class="wh-sub">Last triggered: 2 min ago</div>
+            </div>
+            <span class="wh-badge">Connected</span>
+          </div>
+          <div class="wh-stat" id="wh-stat">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS SCREEN ══ -->
+  <div id="sc-settings" class="screen">
+    <div class="scroll">
+
+      <div class="set-group">
+        <div class="set-group-lbl">Appearance</div>
+        <div class="set-row" onclick="toggleTheme()">
+          <div>
+            <div class="set-lbl">Dark Mode</div>
+            <div class="set-sub">Switch between light and dark</div>
+          </div>
+          <label class="tog" onclick="event.stopPropagation()">
+            <input type="checkbox" id="tog-dark" onchange="applyThemeFromToggle()">
+            <div class="tog-track"></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="set-group">
+        <div class="set-group-lbl">Notifications</div>
+        <div class="set-row">
+          <div>
+            <div class="set-lbl">Enable Notifications</div>
+            <div class="set-sub">Browser push alerts</div>
+          </div>
+          <label class="tog">
+            <input type="checkbox" id="tog-notif" onchange="toggleNotif()" checked>
+            <div class="tog-track"></div>
+          </label>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-lbl">Auto-send Greetings</div>
+            <div class="set-sub">Send automatically on event day</div>
+          </div>
+          <label class="tog">
+            <input type="checkbox" id="tog-auto" checked>
+            <div class="tog-track"></div>
+          </label>
+        </div>
+        <div class="set-row">
+          <div>
+            <div class="set-lbl">Retry Failed Messages</div>
+            <div class="set-sub">Up to 3 retry attempts</div>
+          </div>
+          <label class="tog">
+            <input type="checkbox" id="tog-retry">
+            <div class="tog-track"></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="set-group">
+        <div class="set-group-lbl">Integration</div>
+        <div class="set-row" onclick="showToast('Edit webhook URL')">
+          <div>
+            <div class="set-lbl">n8n Webhook URL</div>
+            <div class="set-sub">https://n8n.example.com/wh/...</div>
+          </div>
+          <span class="set-chev">›</span>
+        </div>
+        <div class="set-row" onclick="showToast('WhatsApp setup coming soon')">
+          <div>
+            <div class="set-lbl">WhatsApp Integration</div>
+            <div class="set-sub">Via Twilio / Meta API</div>
+          </div>
+          <span class="set-chev">›</span>
+        </div>
+      </div>
+
+      <div class="set-group">
+        <div class="set-group-lbl">Data</div>
+        <div class="set-row" onclick="exportData()">
+          <div class="set-lbl">Export All Data</div>
+          <span class="set-chev">›</span>
+        </div>
+        <div class="set-row" onclick="clearData()">
+          <div class="set-lbl" style="color:#EF4444">Clear All Data</div>
+          <span class="set-chev" style="color:#EF4444">›</span>
+        </div>
+      </div>
+
+      <div class="app-footer">RemindMe v2.1 &nbsp;·&nbsp; Made with ♥</div>
+    </div>
+  </div>
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <nav class="bottomnav">
+    <button class="bnav-item active" id="bn-home" onclick="switchTab('home')">
+      <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <div class="bnav-dot"></div>
+      <span>Home</span>
+    </button>
+    <button class="bnav-item" id="bn-calendar" onclick="switchTab('calendar')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <div class="bnav-dot"></div>
+      <span>Calendar</span>
+    </button>
+    <button class="bnav-item" id="bn-add" onclick="switchTab('add')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <div class="bnav-dot"></div>
+      <span>Add</span>
+    </button>
+    <button class="bnav-item" id="bn-reminders" onclick="switchTab('reminders')">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="bnav-dot"></div>
+      <span>Alerts</span>
+    </button>
+    <button class="bnav-item" id="bn-settings" onclick="switchTab('settings')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <div class="bnav-dot"></div>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+</div><!-- .app -->
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+/* ══════════════════════════════════════
+   THEME
+══════════════════════════════════════ */
+let isDark = localStorage.getItem('remindme_theme') === 'dark';
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
+  const tog = document.getElementById('tog-dark');
+  if (tog) tog.checked = isDark;
+}
+function toggleTheme() {
+  isDark = !isDark;
+  localStorage.setItem('remindme_theme', isDark ? 'dark' : 'light');
+  applyTheme();
+  showToast(isDark ? '🌙 Dark mode on' : '☀️ Light mode on');
+}
+function applyThemeFromToggle() {
+  isDark = document.getElementById('tog-dark').checked;
+  localStorage.setItem('remindme_theme', isDark ? 'dark' : 'light');
+  applyTheme();
+  showToast(isDark ? '🌙 Dark mode on' : '☀️ Light mode on');
+}
+applyTheme();
+
+/* ══════════════════════════════════════
+   DATA & STATE
+══════════════════════════════════════ */
+const STORE_KEY = 'remindme_events_v2';
+
+let events = JSON.parse(localStorage.getItem(STORE_KEY)) || [
+  {id:1, name:'Priya Rajan',       rel:'Family',          type:'Birthday',    date:'2025-05-03', phone:'+91 98765 43210', email:'', notes:'Loves roses', days:1, sent:0},
+  {id:2, name:'Arjun & Meera',     rel:'Friend',          type:'Anniversary', date:'2025-05-07', phone:'+91 87654 32100', email:'arjun@email.com', notes:'', days:2, sent:1},
+  {id:3, name:'Rahul Kumar',       rel:'Colleague',       type:'Other',       date:'2025-05-15', phone:'', email:'rahul@co.com', notes:'Office party', days:3, sent:0},
+  {id:4, name:'Sunita Nair',       rel:'Friend of Family',type:'Birthday',    date:'2025-06-02', phone:'+91 77654 11200', email:'', notes:'', days:1, sent:0},
+  {id:5, name:'Dev Sharma',        rel:'Friend',          type:'Birthday',    date:'2025-04-30', phone:'+91 99887 76655', email:'dev@dev.com', notes:'Loves tech gadgets', days:1, sent:2},
+  {id:6, name:'Meena & Raj',       rel:'Family',          type:'Anniversary', date:'2025-05-22', phone:'+91 90011 22334', email:'', notes:'25 years', days:3, sent:0},
+  {id:7, name:'Kavya Singh',       rel:'Friend',          type:'Birthday',    date:'2025-05-28', phone:'+91 88811 99900', email:'kavya@mail.com', notes:'', days:1, sent:0}
+];
+
+function saveEvents() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(events));
+}
+
+const NOW = new Date();
+let calYear  = NOW.getFullYear();
+let calMonth = NOW.getMonth();
+let selDay   = null;
+let activeFilter = 'all';
+
+const MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+
+const AV_COLS   = ['av-pk','av-bl','av-vl','av-gr','av-or'];
+const TYPE_STRIPE = {Birthday:'stripe-bday', Anniversary:'stripe-anni', Other:'stripe-other'};
+const TYPE_BADGE  = {Birthday:'badge-bday',  Anniversary:'badge-anni',  Other:'badge-other'};
+const DOT_CLS     = {Birthday:'cd-bday',     Anniversary:'cd-anni',     Other:'cd-other'};
+const DOT_COLOR   = {Birthday:'#EC4899',     Anniversary:'#0EA5E9',     Other:'#8B5CF6'};
+
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function initials(n) {
+  return n.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0,2).toUpperCase();
+}
+function avClass(id) { return AV_COLS[id % AV_COLS.length]; }
+
+function daysUntil(dateStr) {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const d = new Date(dateStr);
+  const nxt = new Date(t.getFullYear(), d.getMonth(), d.getDate());
+  const target = nxt >= t ? nxt : new Date(t.getFullYear()+1, d.getMonth(), d.getDate());
+  return Math.round((target - t) / 86400000);
+}
+
+function pillClass(n) {
+  if (n === 0) return 'pill-today';
+  if (n <= 7)  return 'pill-soon';
+  return 'pill-later';
+}
+function pillLabel(n) {
+  if (n === 0) return 'Today!';
+  if (n === 1) return 'Tomorrow';
+  return n + ' days';
+}
+
+function fmtDate(s) {
+  const d = new Date(s);
+  return d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+}
+function fmtDateFull(s) {
+  const d = new Date(s);
+  return d.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+}
+
+/* ══════════════════════════════════════
+   FILTER
+══════════════════════════════════════ */
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.filter === f);
+  });
+  const labels = {
+    all: 'Coming Up Soon',
+    Birthday: 'Birthdays',
+    Anniversary: 'Anniversaries',
+    Other: 'Other Events',
+    week: 'This Week',
+    today: 'Today'
+  };
+  document.getElementById('home-sec-label').textContent = labels[f] || 'Coming Up Soon';
+  renderHomeList();
+}
+
+function applyFilter(list) {
+  let filtered = list;
+  if (activeFilter === 'Birthday' || activeFilter === 'Anniversary' || activeFilter === 'Other') {
+    filtered = list.filter(e => e.type === activeFilter);
+  } else if (activeFilter === 'week') {
+    filtered = list.filter(e => { const n = daysUntil(e.date); return n >= 0 && n <= 7; });
+  } else if (activeFilter === 'today') {
+    filtered = list.filter(e => daysUntil(e.date) === 0);
+  } else {
+    filtered = list.filter(e => daysUntil(e.date) <= 30);
+  }
+  return filtered;
+}
+
+/* ══════════════════════════════════════
+   BUILD CARDS
+══════════════════════════════════════ */
+function buildEventCard(ev, showDelete) {
+  const n = daysUntil(ev.date);
+  const del = showDelete
+    ? `<button onclick="deleteEvent(${ev.id},event)" style="background:none;border:none;color:#EF4444;font-size:18px;cursor:pointer;padding:0;line-height:1;margin-left:8px;" title="Delete">×</button>`
+    : '';
+  return `
+  <div class="ecard" onclick="openDetailModal(${ev.id})">
+    <div class="ecard-stripe ${TYPE_STRIPE[ev.type]||'stripe-other'}"></div>
+    <div class="av ${avClass(ev.id)}">${initials(ev.name)}</div>
+    <div class="ecard-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="ecard-name">${ev.name}</div>
+        ${del}
+      </div>
+      <div class="ecard-sub">${ev.rel}${ev.phone?' · '+ev.phone:''}</div>
+      <div class="ecard-foot">
+        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+          <span class="badge ${TYPE_BADGE[ev.type]||'badge-other'}">${ev.type}</span>
+          <span style="font-size:10px;color:var(--t3)">${fmtDate(ev.date)}</span>
+        </div>
+        <span class="pill ${pillClass(n)}">${pillLabel(n)}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ══════════════════════════════════════
+   HOME
+══════════════════════════════════════ */
+function renderHome() {
+  const now = new Date();
+  document.getElementById('stat-total').textContent = events.length;
+  document.getElementById('stat-month').textContent = events.filter(e => {
+    const d = new Date(e.date);
+    return d.getMonth() === now.getMonth();
+  }).length;
+  document.getElementById('stat-week').textContent = events.filter(e => {
+    const n = daysUntil(e.date);
+    return n >= 0 && n <= 7;
+  }).length;
+  renderHomeList();
+}
+
+function renderHomeList() {
+  const sorted = [...events].sort((a,b) => daysUntil(a.date) - daysUntil(b.date));
+  const filtered = applyFilter(sorted).slice(0, 10);
+
+  document.getElementById('home-events').innerHTML = filtered.length
+    ? filtered.map(e => buildEventCard(e, false)).join('')
+    : `<div class="empty-state">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <h4>No Events Found</h4>
+        <p>Try a different filter or add new events!</p>
+       </div>`;
+}
+
+/* ══════════════════════════════════════
+   CALENDAR
+══════════════════════════════════════ */
+function renderCalendar() {
+  document.getElementById('cal-title').textContent = MONTHS[calMonth] + ' ' + calYear;
+
+  const firstDay    = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const evMap = {};
+  events.forEach(ev => {
+    const d = new Date(ev.date);
+    if (d.getFullYear() === calYear && d.getMonth() === calMonth) {
+      const k = d.getDate();
+      if (!evMap[k]) evMap[k] = [];
+      evMap[k].push(ev);
+    }
+  });
+
+  let html = '';
+
+  for (let i = 0; i < firstDay; i++) {
+    const dn = daysInPrev - firstDay + i + 1;
+    html += `<div class="cal-cell other-month"><span class="cal-num">${dn}</span></div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cellDate = new Date(calYear, calMonth, d);
+    cellDate.setHours(0,0,0,0);
+    const isToday   = cellDate.getTime() === today.getTime();
+    const isSel     = selDay === d;
+    const evs       = evMap[d] || [];
+
+    let cls = 'cal-cell';
+    if (isToday)  cls += ' today-cell';
+    if (isSel && !isToday) cls += ' selected';
+    if (isSel && isToday)  cls += ' selected';
+
+    const dots = evs.slice(0,3).map(e =>
+      `<div class="cal-dot ${DOT_CLS[e.type]||'cd-other'}"></div>`
+    ).join('');
+
+    html += `<div class="${cls}" onclick="selectDay(${d})">
+      <span class="cal-num">${d}</span>
+      ${evs.length ? `<div class="cal-dots">${dots}</div>` : ''}
+    </div>`;
+  }
+
+  const total     = firstDay + daysInMonth;
+  const remaining = (7 - total % 7) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="cal-cell other-month"><span class="cal-num">${i}</span></div>`;
+  }
+
+  document.getElementById('cal-grid').innerHTML = html;
+  renderDayDetail();
+  renderMonthList();
+}
+
+function selectDay(d) {
+  selDay = (selDay === d) ? null : d;
+  renderCalendar();
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  selDay = null;
+  renderCalendar();
+}
+
+function renderDayDetail() {
+  const panel = document.getElementById('day-detail');
+  if (!selDay) { panel.innerHTML = ''; return; }
+
+  const evs = events.filter(ev => {
+    const d = new Date(ev.date);
+    return d.getFullYear() === calYear && d.getMonth() === calMonth && d.getDate() === selDay;
+  });
+
+  const label = MONTHS[calMonth] + ' ' + selDay + ', ' + calYear;
+
+  if (!evs.length) {
+    panel.innerHTML = `<div class="day-panel">
+      <div class="day-panel-hdr"><span class="day-panel-title">${label}</span></div>
+      <div class="day-panel-empty">No events on this day</div>
+    </div>`;
+    return;
+  }
+
+  const rows = evs.map(ev => `
+    <div class="dp-event">
+      <div class="dp-dot" style="background:${DOT_COLOR[ev.type]||'#8B5CF6'}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="dp-name">${ev.name}</div>
+        <div class="dp-meta">${ev.type} · ${ev.rel}${ev.notes ? ' · ' + ev.notes : ''}</div>
+      </div>
+      <button class="dp-send" onclick="sendGreeting(${ev.id})">Send</button>
+    </div>`).join('');
+
+  panel.innerHTML = `<div class="day-panel">
+    <div class="day-panel-hdr">
+      <span class="day-panel-title">${label}</span>
+      <span class="day-cnt-badge">${evs.length} event${evs.length > 1 ? 's' : ''}</span>
+    </div>
+    ${rows}
+  </div>`;
+}
+
+function renderMonthList() {
+  const evs = events
+    .filter(ev => { const d = new Date(ev.date); return d.getFullYear()===calYear && d.getMonth()===calMonth; })
+    .sort((a,b) => new Date(a.date).getDate() - new Date(b.date).getDate());
+
+  const lbl = document.getElementById('month-events-label');
+  lbl.textContent = `Events in ${MONTHS[calMonth]}`;
+
+  document.getElementById('cal-month-list').innerHTML = evs.length
+    ? evs.map(e => buildEventCard(e, true)).join('')
+    : `<div style="text-align:center;padding:20px;color:var(--t3);font-size:12px">No events in ${MONTHS[calMonth]}</div>`;
+}
+
+/* ══════════════════════════════════════
+   REMINDERS
+══════════════════════════════════════ */
+function renderReminders() {
+  const upcoming = events
+    .filter(e => { const n = daysUntil(e.date); return n >= 0 && n <= 30; })
+    .sort((a,b) => daysUntil(a.date) - daysUntil(b.date));
+
+  const totalSent = events.reduce((s,e) => s + (e.sent||0), 0);
+  document.getElementById('wh-stat').textContent = `${totalSent} message${totalSent!==1?'s':''} sent · 0 failed`;
+
+  document.getElementById('rem-list').innerHTML = upcoming.length
+    ? upcoming.map(ev => {
+        const n = daysUntil(ev.date);
+        return `<div class="rem-item">
+          <div class="rem-dot" style="background:${DOT_COLOR[ev.type]||'#8B5CF6'}"></div>
+          <div class="rem-info">
+            <div class="rem-name">${ev.name} · ${ev.type}</div>
+            <div class="rem-sub">Reminder: ${ev.days} day${ev.days!==1?'s':''} before · ${fmtDate(ev.date)}</div>
+          </div>
+          <div class="rem-right">
+            <div class="rem-days">${pillLabel(n)}</div>
+            <div class="rem-status" style="color:${n<=3?'#D97706':'#10B981'}">${n<=3?'⚡ Soon':'✓ Active'}</div>
+          </div>
+        </div>`;
+      }).join('')
+    : `<div class="empty-state">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <h4>All Clear!</h4>
+        <p>No events in the next 30 days</p>
+       </div>`;
+}
+
+/* ══════════════════════════════════════
+   ACTIONS
+══════════════════════════════════════ */
+function saveEvent() {
+  const name  = document.getElementById('f-name').value.trim();
+  const rel   = document.getElementById('f-rel').value;
+  const type  = document.getElementById('f-type').value;
+  const date  = document.getElementById('f-date').value;
+
+  if (!name || !rel || !type || !date) {
+    showToast('⚠️ Please fill in all required fields');
+    return;
+  }
+
+  const ev = {
+    id:    Date.now(),
+    name, rel, type, date,
+    phone: document.getElementById('f-phone').value,
+    email: document.getElementById('f-email').value,
+    notes: document.getElementById('f-notes').value,
+    days:  parseInt(document.getElementById('f-days').value) || 1,
+    sent:  0
+  };
+
+  events.push(ev);
+  saveEvents();
+
+  ['f-name','f-rel','f-type','f-date','f-phone','f-email','f-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-days').value = '1';
+
+  renderHome();
+  renderReminders();
+
+  const evDate = new Date(date);
+  calYear  = evDate.getFullYear();
+  calMonth = evDate.getMonth();
+  selDay   = evDate.getDate();
+
+  showToast('🎉 Event saved successfully!');
+  setTimeout(() => switchTab('calendar'), 600);
+}
+
+function sendGreeting(id) {
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+  ev.sent = (ev.sent || 0) + 1;
+  saveEvents();
+  renderHome();
+  renderReminders();
+  showToast(`🎉 Greeting sent to ${ev.name}!`);
+}
+
+function deleteEvent(id, e) {
+  if (e) { e.stopPropagation(); }
+  if (!confirm('Delete this event?')) return;
+  events = events.filter(ev => ev.id !== id);
+  saveEvents();
+  renderHome();
+  renderCalendar();
+  renderReminders();
+  showToast('Event deleted');
+}
+
+function openDetailModal(id) {
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+  showToast(`Tap Send to greet ${ev.name}`);
+}
+
+function exportData() {
+  const json = JSON.stringify({events}, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `remindme-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📤 Data exported!');
+}
+
+function clearData() {
+  if (!confirm('Delete all events? This cannot be undone.')) return;
+  events = [];
+  saveEvents();
+  renderHome();
+  renderCalendar();
+  renderReminders();
+  showToast('All data cleared');
+}
+
+function toggleNotif() {
+  const on = document.getElementById('tog-notif').checked;
+  if (on && 'Notification' in window) {
+    Notification.requestPermission().then(p => {
+      if (p !== 'granted') {
+        document.getElementById('tog-notif').checked = false;
+        showToast('Please allow notifications in browser settings');
+      } else {
+        showToast('Notifications enabled!');
+      }
+    });
+  }
+}
+
+/* ══════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('sc-' + name).classList.add('active');
+  document.getElementById('bn-' + name).classList.add('active');
+  if (name === 'calendar')  renderCalendar();
+  if (name === 'reminders') renderReminders();
+  if (name === 'home')      renderHome();
+  window.scrollTo(0, 0);
+}
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+renderHome();
+renderCalendar();
+renderReminders();
+
+setInterval(() => {
+  events.forEach(ev => {
+    const n = daysUntil(ev.date);
+    if (n === ev.days) {
+      const today = new Date().toDateString();
+      if (!ev._lastAlert || ev._lastAlert !== today) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('RemindMe', {
+            body: `${ev.name}'s ${ev.type} is ${n === 0 ? 'today' : 'in '+n+' day'+(n>1?'s':'')}!`,
+            tag: 'event-' + ev.id
+          });
+        }
+        ev._lastAlert = today;
+      }
+    }
+  });
+}, 3600000);
+</script>
+</body>
+</html>
