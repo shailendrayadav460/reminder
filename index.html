@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>RemindMe — Birthday & Anniversary Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -20,67 +21,145 @@ html[data-theme="dark"]{
   --shadow:0 2px 12px rgba(0,0,0,0.3);
   --icon-stroke:#A78BFA;--icon-bg:#2D2A4A;--icon-bg-hover:#3D3A5A;
 }
-html,body{height:100%;font-family:-apple-system,'SF Pro Text','Inter',sans-serif;background:var(--bg);color:var(--t1);font-size:13px;-webkit-font-smoothing:antialiased;transition:background 0.3s,color 0.3s}
-body{display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:0}
-.app{width:100%;max-width:430px;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;position:relative;margin:0 auto;transition:background 0.3s}
+html,body{
+  height:100%;
+  font-family:'Plus Jakarta Sans',-apple-system,'SF Pro Text',sans-serif;
+  background:var(--bg);color:var(--t1);font-size:13px;
+  -webkit-font-smoothing:antialiased;transition:background 0.3s,color 0.3s;
+}
 
-/* ── AUTH SCREENS ── */
+/* ══════════════════════════════
+   AUTH — FULL PAGE SPLIT LAYOUT
+══════════════════════════════ */
+#auth-wrapper{
+  min-height:100vh;width:100%;
+  display:none;
+}
+#auth-wrapper.active{display:flex}
+
 .auth-screen{
-  display:none;flex-direction:column;min-height:100vh;
-  background:var(--bg);
+  display:none;width:100%;min-height:100vh;
 }
 .auth-screen.active{display:flex}
-.auth-hero{
-  background:linear-gradient(135deg,var(--p1) 0%,var(--p2) 100%);
-  padding:60px 28px 40px;position:relative;overflow:hidden;text-align:center;
+
+/* Two-column on desktop, single column on mobile */
+.auth-layout{
+  display:flex;width:100%;min-height:100vh;
 }
-.auth-hero::before{content:'';position:absolute;top:-60px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,0.07);border-radius:50%}
-.auth-hero::after{content:'';position:absolute;bottom:-40px;left:-20px;width:120px;height:120px;background:rgba(255,255,255,0.05);border-radius:50%}
-.auth-logo{font-size:32px;font-weight:900;color:#fff;letter-spacing:-1px;position:relative;z-index:1}
-.auth-tagline{color:rgba(255,255,255,0.8);font-size:13px;margin-top:8px;position:relative;z-index:1}
-.auth-avatar-wrap{margin-top:20px;display:flex;justify-content:center;position:relative;z-index:1}
-.auth-avatar-big{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.2);border:3px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:30px}
-.auth-body{flex:1;padding:28px 24px 40px;overflow-y:auto}
-.auth-title{font-size:22px;font-weight:800;color:var(--t1);margin-bottom:6px}
-.auth-sub{font-size:12px;color:var(--t3);margin-bottom:24px}
-.auth-field{margin-bottom:14px}
-.auth-field label{display:block;font-size:10px;font-weight:700;color:var(--t2);margin-bottom:5px;letter-spacing:0.4px;text-transform:uppercase}
-.auth-field input{
-  width:100%;padding:13px 15px;
-  border:0.5px solid rgba(79,70,229,0.2);border-radius:12px;
-  font-size:14px;font-family:inherit;background:#FAFAFE;color:var(--t1);
-  transition:border-color 0.2s,box-shadow 0.2s;-webkit-appearance:none;
+
+/* LEFT PANEL — decorative */
+.auth-panel-left{
+  flex:0 0 46%;
+  background:linear-gradient(145deg,#3730A3 0%,#6D28D9 50%,#9333EA 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 40px;position:relative;overflow:hidden;
 }
-html[data-theme="dark"] .auth-field input{background:#151325;color:var(--t1);border-color:rgba(139,92,246,0.25)}
-.auth-field input:focus{outline:none;border-color:var(--p1);background:#fff;box-shadow:0 0 0 3px rgba(79,70,229,0.1)}
-html[data-theme="dark"] .auth-field input:focus{background:#1C1A2E}
-.auth-field input::placeholder{color:var(--t3)}
-.auth-btn{
-  width:100%;padding:15px;
-  background:linear-gradient(135deg,var(--p1),var(--p2));
-  color:#fff;border:none;border-radius:14px;
-  font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;
-  transition:opacity 0.2s,transform 0.15s;
+.auth-panel-left::before{
+  content:'';position:absolute;
+  top:-80px;right:-80px;width:300px;height:300px;
+  background:rgba(255,255,255,0.06);border-radius:50%;
 }
-.auth-btn:hover{opacity:0.92;transform:translateY(-1px)}
-.auth-btn:active{transform:scale(0.98)}
-.auth-divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:var(--t3);font-size:11px}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:0.5px;background:var(--bdr)}
-.auth-switch{text-align:center;font-size:12px;color:var(--t2);margin-top:20px}
-.auth-switch a{color:var(--p1);font-weight:700;cursor:pointer;text-decoration:none}
-.auth-switch a:hover{text-decoration:underline}
-.auth-err{background:#FEF2F2;border:0.5px solid #FECACA;color:#DC2626;font-size:12px;padding:10px 13px;border-radius:10px;margin-bottom:14px;display:none}
-html[data-theme="dark"] .auth-err{background:#2D1515;border-color:#7F1D1D;color:#FCA5A5}
-.auth-err.show{display:block}
+.auth-panel-left::after{
+  content:'';position:absolute;
+  bottom:-60px;left:-40px;width:200px;height:200px;
+  background:rgba(255,255,255,0.04);border-radius:50%;
+}
+.auth-brand{position:relative;z-index:1;text-align:center}
+.auth-brand-icon{
+  width:80px;height:80px;border-radius:24px;
+  background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;margin:0 auto 20px;
+}
+.auth-brand-name{font-size:32px;font-weight:800;color:#fff;letter-spacing:-1px}
+.auth-brand-tag{color:rgba(255,255,255,0.7);font-size:14px;margin-top:8px;font-weight:500}
+.auth-features{margin-top:48px;display:flex;flex-direction:column;gap:16px;width:100%;max-width:280px;position:relative;z-index:1}
+.auth-feature{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);
+  border-radius:14px;padding:13px 16px;
+}
+.auth-feature-icon{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.auth-feature-text{color:#fff}
+.auth-feature-title{font-size:13px;font-weight:700}
+.auth-feature-sub{font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px}
+
+/* RIGHT PANEL — form */
+.auth-panel-right{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 40px;background:var(--surf);overflow-y:auto;
+  transition:background 0.3s;
+}
+.auth-form-box{width:100%;max-width:400px}
+.auth-form-title{font-size:26px;font-weight:800;color:var(--t1);letter-spacing:-0.5px;margin-bottom:4px}
+.auth-form-sub{font-size:13px;color:var(--t3);margin-bottom:28px;font-weight:500}
+
 .social-btn{
-  width:100%;padding:13px;
-  background:var(--surf);border:0.5px solid var(--bdr);border-radius:12px;
+  width:100%;padding:13px 16px;
+  background:var(--bg);border:1px solid var(--bdr);border-radius:12px;
   color:var(--t1);font-size:13px;font-weight:600;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:10px;
-  transition:background 0.2s,box-shadow 0.2s;margin-bottom:10px;
+  transition:all 0.2s;margin-bottom:18px;font-family:inherit;
 }
-.social-btn:hover{background:var(--icon-bg);box-shadow:var(--shadow)}
+.social-btn:hover{background:var(--icon-bg);border-color:rgba(79,70,229,0.3);box-shadow:0 2px 8px rgba(79,70,229,0.1)}
 .social-btn svg{width:18px;height:18px;flex-shrink:0}
+
+.auth-divider{
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+  color:var(--t3);font-size:12px;font-weight:600;letter-spacing:0.3px;
+}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase}
+.auth-field input{
+  width:100%;padding:13px 15px;
+  border:1px solid rgba(79,70,229,0.15);border-radius:12px;
+  font-size:14px;font-family:inherit;background:var(--bg);color:var(--t1);
+  transition:all 0.2s;-webkit-appearance:none;
+}
+html[data-theme="dark"] .auth-field input{background:#151325;color:var(--t1);border-color:rgba(139,92,246,0.2)}
+.auth-field input:focus{outline:none;border-color:var(--p1);background:#fff;box-shadow:0 0 0 4px rgba(79,70,229,0.08)}
+html[data-theme="dark"] .auth-field input:focus{background:#1C1A2E}
+.auth-field input::placeholder{color:var(--t3)}
+
+.auth-btn{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--p1),var(--p2));
+  color:#fff;border:none;border-radius:12px;
+  font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;
+  transition:all 0.2s;font-family:inherit;letter-spacing:0.2px;
+}
+.auth-btn:hover{opacity:0.92;transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,70,229,0.35)}
+.auth-btn:active{transform:scale(0.98)}
+
+.auth-switch{text-align:center;font-size:13px;color:var(--t2);margin-top:22px;font-weight:500}
+.auth-switch a{color:var(--p1);font-weight:700;cursor:pointer;text-decoration:none}
+.auth-switch a:hover{text-decoration:underline}
+
+.auth-err{background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;font-size:12px;padding:11px 14px;border-radius:10px;margin-bottom:14px;display:none;font-weight:600}
+html[data-theme="dark"] .auth-err{background:#2D1515;border-color:#7F1D1D;color:#FCA5A5}
+.auth-err.show{display:block}
+
+.auth-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Mobile — stack panels */
+@media(max-width:768px){
+  .auth-layout{flex-direction:column}
+  .auth-panel-left{
+    flex:none;padding:40px 24px 36px;
+    min-height:auto;
+  }
+  .auth-features{display:none}
+  .auth-brand-icon{width:64px;height:64px;border-radius:20px;font-size:28px;margin-bottom:14px}
+  .auth-brand-name{font-size:26px}
+  .auth-panel-right{padding:36px 24px 48px;justify-content:flex-start}
+  .auth-form-box{max-width:100%}
+  .auth-form-row{grid-template-columns:1fr}
+}
+
+/* ── APP WRAPPER ── */
+.app{width:100%;max-width:430px;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;position:relative;margin:0 auto;transition:background 0.3s}
 
 /* ── TOP NAV ── */
 .topnav{
@@ -104,8 +183,6 @@ html[data-theme="dark"] .topnav{background:rgba(28,26,46,0.96)}
 .theme-btn .icon-moon{opacity:0;transform:rotate(-90deg)}
 html[data-theme="dark"] .theme-btn .icon-sun{opacity:0;transform:rotate(90deg)}
 html[data-theme="dark"] .theme-btn .icon-moon{opacity:1;transform:rotate(0deg)}
-
-/* Nav avatar */
 .nav-avatar{
   width:34px;height:34px;border-radius:50%;
   background:linear-gradient(135deg,var(--p1),var(--p2));
@@ -262,34 +339,17 @@ html[data-theme="dark"] .field input:focus,html[data-theme="dark"] .field select
 .submit-btn:active{transform:scale(0.98)}
 
 /* ── PROFILE SCREEN ── */
-.profile-hero{
-  background:linear-gradient(135deg,var(--p1) 0%,var(--p2) 100%);
-  padding:30px 20px 60px;position:relative;overflow:hidden;text-align:center;
-}
+.profile-hero{background:linear-gradient(135deg,var(--p1) 0%,var(--p2) 100%);padding:30px 20px 60px;position:relative;overflow:hidden;text-align:center}
 .profile-hero::before{content:'';position:absolute;top:-50px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.07);border-radius:50%}
-.profile-avatar{
-  width:80px;height:80px;border-radius:50%;
-  background:rgba(255,255,255,0.25);border:3px solid rgba(255,255,255,0.5);
-  display:flex;align-items:center;justify-content:center;
-  font-size:28px;font-weight:800;color:#fff;
-  margin:0 auto 12px;position:relative;z-index:1;
-}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.25);border:3px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;margin:0 auto 12px;position:relative;z-index:1}
 .profile-name{font-size:20px;font-weight:800;color:#fff;position:relative;z-index:1}
 .profile-email{font-size:12px;color:rgba(255,255,255,0.75);margin-top:4px;position:relative;z-index:1}
 .profile-since{font-size:10px;color:rgba(255,255,255,0.6);margin-top:4px;position:relative;z-index:1}
-
-.profile-stats{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:0;
-  background:var(--surf);border:0.5px solid var(--bdr);
-  border-radius:16px;margin:-28px 16px 16px;
-  box-shadow:0 4px 20px rgba(79,70,229,0.12);
-  position:relative;z-index:2;overflow:hidden;
-}
+.profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--surf);border:0.5px solid var(--bdr);border-radius:16px;margin:-28px 16px 16px;box-shadow:0 4px 20px rgba(79,70,229,0.12);position:relative;z-index:2;overflow:hidden}
 .pstat{padding:14px 8px;text-align:center;border-right:0.5px solid var(--bdr)}
 .pstat:last-child{border-right:none}
 .pstat-num{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--p1),var(--p2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .pstat-lbl{font-size:9px;color:var(--t3);font-weight:600;margin-top:3px;letter-spacing:0.4px}
-
 .profile-section{margin:0 16px 16px}
 .profile-card{background:var(--surf);border:0.5px solid var(--bdr);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
 .profile-card-lbl{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:0.8px;text-transform:uppercase;padding:12px 15px 7px}
@@ -311,14 +371,12 @@ html[data-theme="dark"] .pri-green{background:#1A3020}
 html[data-theme="dark"] .pri-amber{background:#3D2A00}
 html[data-theme="dark"] .pri-purple{background:#2A1A40}
 html[data-theme="dark"] .pri-red{background:#2D1515}
-.profile-row-text{}
 .profile-row-lbl{font-size:13px;font-weight:600;color:var(--t1)}
 .profile-row-sub{font-size:10px;color:var(--t3);margin-top:1px}
 .profile-row-right{display:flex;align-items:center;gap:8px}
 .profile-row-val{font-size:11px;color:var(--t3)}
 .profile-chev{color:var(--t3);font-size:15px}
 
-/* toggle */
 .tog{position:relative;width:46px;height:26px;flex-shrink:0}
 .tog input{opacity:0;width:0;height:0;position:absolute}
 .tog-track{position:absolute;inset:0;background:#E5E7EB;border-radius:13px;transition:background 0.25s;cursor:pointer}
@@ -326,14 +384,7 @@ html[data-theme="dark"] .pri-red{background:#2D1515}
 .tog input:checked+.tog-track{background:linear-gradient(135deg,var(--p1),var(--p2))}
 .tog input:checked+.tog-track::before{transform:translateX(20px)}
 
-/* logout btn */
-.logout-btn{
-  width:calc(100% - 32px);margin:0 16px 24px;padding:14px;
-  background:var(--surf);border:0.5px solid rgba(239,68,68,0.3);
-  color:#EF4444;border-radius:14px;font-size:14px;font-weight:700;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
-  transition:background 0.2s,box-shadow 0.2s;
-}
+.logout-btn{width:calc(100% - 32px);margin:0 16px 24px;padding:14px;background:var(--surf);border:0.5px solid rgba(239,68,68,0.3);color:#EF4444;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s,box-shadow 0.2s}
 .logout-btn:hover{background:#FEF2F2;box-shadow:0 2px 12px rgba(239,68,68,0.1)}
 .logout-btn svg{width:16px;height:16px;stroke:#EF4444;fill:none;stroke-width:2}
 
@@ -365,89 +416,166 @@ html[data-theme="dark"] .toast{background:#E5E7EB;color:#111827}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .app-footer{text-align:center;padding:10px 0 4px;font-size:10px;color:var(--t3)}
 
+/* ── APP CENTERING (desktop) ── */
+#main-app-wrapper{
+  width:100%;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;
+  background:var(--bg);
+}
 @media(min-width:431px){
   .app{border-radius:24px;margin:20px auto;min-height:auto;box-shadow:0 8px 48px rgba(79,70,229,0.12)}
   .bottomnav{border-radius:0 0 24px 24px}
-  .auth-screen{border-radius:24px;margin:20px auto;max-width:430px;min-height:auto;box-shadow:0 8px 48px rgba(79,70,229,0.12)}
 }
 @media(max-width:360px){.field-row{grid-template-columns:1fr}.hero h2{font-size:16px}}
 </style>
 </head>
 <body>
 
-<!-- ══ AUTH WRAPPER ── -->
+<!-- ══ AUTH — FULL PAGE ══ -->
 <div id="auth-wrapper">
 
   <!-- LOGIN -->
   <div class="auth-screen active" id="auth-login">
-    <div class="auth-hero">
-      <div class="auth-avatar-wrap"><div class="auth-avatar-big">🎉</div></div>
-      <div class="auth-logo" style="margin-top:14px">RemindMe</div>
-      <div class="auth-tagline">Never miss a special moment</div>
-    </div>
-    <div class="auth-body">
-      <div class="auth-title">Welcome back!</div>
-      <div class="auth-sub">Sign in to your account</div>
-      <div class="auth-err" id="login-err"></div>
-      <button class="social-btn" onclick="googleAuth()">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-        Continue with Google
-      </button>
-      <div class="auth-divider">or sign in with email</div>
-      <div class="auth-field">
-        <label>Email</label>
-        <input type="email" id="login-email" placeholder="name@example.com" autocomplete="email">
+    <div class="auth-layout">
+      <!-- Left decorative panel -->
+      <div class="auth-panel-left">
+        <div class="auth-brand">
+          <div class="auth-brand-icon">🎉</div>
+          <div class="auth-brand-name">RemindMe</div>
+          <div class="auth-brand-tag">Never miss a special moment</div>
+        </div>
+        <div class="auth-features">
+          <div class="auth-feature">
+            <div class="auth-feature-icon">🎂</div>
+            <div class="auth-feature-text">
+              <div class="auth-feature-title">Track Birthdays</div>
+              <div class="auth-feature-sub">Get reminders before they arrive</div>
+            </div>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">💍</div>
+            <div class="auth-feature-text">
+              <div class="auth-feature-title">Anniversaries</div>
+              <div class="auth-feature-sub">Never forget the important ones</div>
+            </div>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">📲</div>
+            <div class="auth-feature-text">
+              <div class="auth-feature-title">Auto Greetings</div>
+              <div class="auth-feature-sub">Send via WhatsApp or email</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="auth-field">
-        <label>Password</label>
-        <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password">
+
+      <!-- Right form panel -->
+      <div class="auth-panel-right">
+        <div class="auth-form-box">
+          <div class="auth-form-title">Welcome back!</div>
+          <div class="auth-form-sub">Sign in to your account to continue</div>
+          <div class="auth-err" id="login-err"></div>
+
+          <button class="social-btn" onclick="googleAuth()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Continue with Google
+          </button>
+
+          <div class="auth-divider">or sign in with email</div>
+
+          <div class="auth-field">
+            <label>Email address</label>
+            <input type="email" id="login-email" placeholder="name@example.com" autocomplete="email">
+          </div>
+          <div class="auth-field">
+            <label>Password</label>
+            <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password">
+          </div>
+          <button class="auth-btn" onclick="doLogin()">Sign In →</button>
+          <div class="auth-switch">Don't have an account? <a onclick="showAuth('signup')">Create one</a></div>
+        </div>
       </div>
-      <button class="auth-btn" onclick="doLogin()">Sign In</button>
-      <div class="auth-switch">Don't have an account? <a onclick="showAuth('signup')">Sign up</a></div>
     </div>
   </div>
 
   <!-- SIGNUP -->
   <div class="auth-screen" id="auth-signup">
-    <div class="auth-hero">
-      <div class="auth-avatar-wrap"><div class="auth-avatar-big">✨</div></div>
-      <div class="auth-logo" style="margin-top:14px">RemindMe</div>
-      <div class="auth-tagline">Create your free account</div>
-    </div>
-    <div class="auth-body">
-      <div class="auth-title">Get started</div>
-      <div class="auth-sub">Create your account in seconds</div>
-      <div class="auth-err" id="signup-err"></div>
-      <button class="social-btn" onclick="googleAuth()">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-        Continue with Google
-      </button>
-      <div class="auth-divider">or sign up with email</div>
-      <div class="auth-field">
-        <label>Full Name</label>
-        <input type="text" id="signup-name" placeholder="Your full name" autocomplete="name">
+    <div class="auth-layout">
+      <!-- Left decorative panel -->
+      <div class="auth-panel-left">
+        <div class="auth-brand">
+          <div class="auth-brand-icon">✨</div>
+          <div class="auth-brand-name">RemindMe</div>
+          <div class="auth-brand-tag">Create your free account</div>
+        </div>
+        <div class="auth-features">
+          <div class="auth-feature">
+            <div class="auth-feature-icon">📅</div>
+            <div class="auth-feature-text">
+              <div class="auth-feature-title">Smart Calendar</div>
+              <div class="auth-feature-sub">Visual overview of all events</div>
+            </div>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">🔔</div>
+            <div class="auth-feature-text">
+              <div class="auth-feature-title">Early Reminders</div>
+              <div class="auth-feature-sub">Set alerts days in advance</div>
+            </div>
+          </div>
+          <div class="auth-feature">
+            <div class="auth-feature-icon">🔗</div>
+            <div class="auth-feature-text">
+              <div class="auth-feature-title">n8n Integration</div>
+              <div class="auth-feature-sub">Automate with webhooks</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="auth-field">
-        <label>Email</label>
-        <input type="email" id="signup-email" placeholder="name@example.com" autocomplete="email">
+
+      <!-- Right form panel -->
+      <div class="auth-panel-right">
+        <div class="auth-form-box">
+          <div class="auth-form-title">Create account</div>
+          <div class="auth-form-sub">Get started for free — no credit card needed</div>
+          <div class="auth-err" id="signup-err"></div>
+
+          <button class="social-btn" onclick="googleAuth()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Sign up with Google
+          </button>
+
+          <div class="auth-divider">or sign up with email</div>
+
+          <div class="auth-field">
+            <label>Full Name</label>
+            <input type="text" id="signup-name" placeholder="Your full name" autocomplete="name">
+          </div>
+          <div class="auth-field">
+            <label>Email address</label>
+            <input type="email" id="signup-email" placeholder="name@example.com" autocomplete="email">
+          </div>
+          <div class="auth-form-row">
+            <div class="auth-field">
+              <label>Password</label>
+              <input type="password" id="signup-pass" placeholder="Min. 6 chars" autocomplete="new-password">
+            </div>
+            <div class="auth-field">
+              <label>Confirm Password</label>
+              <input type="password" id="signup-pass2" placeholder="Repeat" autocomplete="new-password">
+            </div>
+          </div>
+          <button class="auth-btn" onclick="doSignup()">Create Account →</button>
+          <div class="auth-switch">Already have an account? <a onclick="showAuth('login')">Sign in</a></div>
+        </div>
       </div>
-      <div class="auth-field">
-        <label>Password</label>
-        <input type="password" id="signup-pass" placeholder="Min. 6 characters" autocomplete="new-password">
-      </div>
-      <div class="auth-field">
-        <label>Confirm Password</label>
-        <input type="password" id="signup-pass2" placeholder="Repeat password" autocomplete="new-password">
-      </div>
-      <button class="auth-btn" onclick="doSignup()">Create Account</button>
-      <div class="auth-switch">Already have an account? <a onclick="showAuth('login')">Sign in</a></div>
     </div>
   </div>
 
 </div><!-- #auth-wrapper -->
 
-<!-- ══ MAIN APP ── -->
-<div class="app" id="main-app" style="display:none">
+<!-- ══ MAIN APP ══ -->
+<div id="main-app-wrapper" style="display:none">
+<div class="app" id="main-app">
 
   <nav class="topnav">
     <div class="logo">🎉 RemindMe</div>
@@ -585,51 +713,37 @@ html[data-theme="dark"] .toast{background:#E5E7EB;color:#111827}
         <div class="profile-email" id="profile-email-display">–</div>
         <div class="profile-since" id="profile-since-display">Member since –</div>
       </div>
-
       <div class="profile-stats">
         <div class="pstat"><div class="pstat-num" id="ps-total">0</div><div class="pstat-lbl">Total</div></div>
         <div class="pstat"><div class="pstat-num" id="ps-month">0</div><div class="pstat-lbl">This Month</div></div>
         <div class="pstat"><div class="pstat-num" id="ps-sent">0</div><div class="pstat-lbl">Sent</div></div>
       </div>
-
-      <!-- Account Info -->
       <div class="profile-section">
         <div class="profile-card">
           <div class="profile-card-lbl">Account</div>
           <div class="profile-row" onclick="editProfile()">
             <div class="profile-row-left">
               <div class="profile-row-icon pri-blue"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-              <div class="profile-row-text">
-                <div class="profile-row-lbl">Edit Profile</div>
-                <div class="profile-row-sub">Name, email, phone</div>
-              </div>
+              <div class="profile-row-text"><div class="profile-row-lbl">Edit Profile</div><div class="profile-row-sub">Name, email, phone</div></div>
             </div>
             <div class="profile-row-right"><span class="profile-chev">›</span></div>
           </div>
           <div class="profile-row" onclick="showToast('Change password email sent!')">
             <div class="profile-row-left">
               <div class="profile-row-icon pri-amber"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-              <div class="profile-row-text">
-                <div class="profile-row-lbl">Change Password</div>
-                <div class="profile-row-sub">Update your password</div>
-              </div>
+              <div class="profile-row-text"><div class="profile-row-lbl">Change Password</div><div class="profile-row-sub">Update your password</div></div>
             </div>
             <div class="profile-row-right"><span class="profile-chev">›</span></div>
           </div>
         </div>
       </div>
-
-      <!-- Preferences -->
       <div class="profile-section">
         <div class="profile-card">
           <div class="profile-card-lbl">Preferences</div>
           <div class="profile-row">
             <div class="profile-row-left">
               <div class="profile-row-icon pri-purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
-              <div class="profile-row-text">
-                <div class="profile-row-lbl">Dark Mode</div>
-                <div class="profile-row-sub">Switch theme</div>
-              </div>
+              <div class="profile-row-text"><div class="profile-row-lbl">Dark Mode</div><div class="profile-row-sub">Switch theme</div></div>
             </div>
             <label class="tog" onclick="event.stopPropagation()">
               <input type="checkbox" id="tog-dark-profile" onchange="applyThemeFromToggle('profile')">
@@ -639,10 +753,7 @@ html[data-theme="dark"] .toast{background:#E5E7EB;color:#111827}
           <div class="profile-row">
             <div class="profile-row-left">
               <div class="profile-row-icon pri-pink"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-              <div class="profile-row-text">
-                <div class="profile-row-lbl">Notifications</div>
-                <div class="profile-row-sub">Push alerts</div>
-              </div>
+              <div class="profile-row-text"><div class="profile-row-lbl">Notifications</div><div class="profile-row-sub">Push alerts</div></div>
             </div>
             <label class="tog" onclick="event.stopPropagation()">
               <input type="checkbox" id="tog-notif-profile" checked onchange="toggleNotif()">
@@ -652,10 +763,7 @@ html[data-theme="dark"] .toast{background:#E5E7EB;color:#111827}
           <div class="profile-row">
             <div class="profile-row-left">
               <div class="profile-row-icon pri-green"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-              <div class="profile-row-text">
-                <div class="profile-row-lbl">Auto-send Greetings</div>
-                <div class="profile-row-sub">Send on event day</div>
-              </div>
+              <div class="profile-row-text"><div class="profile-row-lbl">Auto-send Greetings</div><div class="profile-row-sub">Send on event day</div></div>
             </div>
             <label class="tog" onclick="event.stopPropagation()">
               <input type="checkbox" id="tog-auto-profile" checked>
@@ -664,35 +772,25 @@ html[data-theme="dark"] .toast{background:#E5E7EB;color:#111827}
           </div>
         </div>
       </div>
-
-      <!-- Integrations -->
       <div class="profile-section">
         <div class="profile-card">
           <div class="profile-card-lbl">Integrations</div>
           <div class="profile-row" onclick="showToast('Edit webhook URL')">
             <div class="profile-row-left">
               <div class="profile-row-icon pri-blue"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
-              <div class="profile-row-text">
-                <div class="profile-row-lbl">n8n Webhook</div>
-                <div class="profile-row-sub">https://n8n.example.com/wh/...</div>
-              </div>
+              <div class="profile-row-text"><div class="profile-row-lbl">n8n Webhook</div><div class="profile-row-sub">https://n8n.example.com/wh/...</div></div>
             </div>
             <div class="profile-row-right"><span style="font-size:9px;background:#F0FDF4;color:#166534;padding:3px 8px;border-radius:8px;font-weight:700">Active</span></div>
           </div>
           <div class="profile-row" onclick="showToast('WhatsApp setup coming soon')">
             <div class="profile-row-left">
               <div class="profile-row-icon pri-green"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
-              <div class="profile-row-text">
-                <div class="profile-row-lbl">WhatsApp</div>
-                <div class="profile-row-sub">Via Twilio / Meta API</div>
-              </div>
+              <div class="profile-row-text"><div class="profile-row-lbl">WhatsApp</div><div class="profile-row-sub">Via Twilio / Meta API</div></div>
             </div>
             <div class="profile-row-right"><span class="profile-chev">›</span></div>
           </div>
         </div>
       </div>
-
-      <!-- Data -->
       <div class="profile-section">
         <div class="profile-card">
           <div class="profile-card-lbl">Data</div>
@@ -712,7 +810,6 @@ html[data-theme="dark"] .toast{background:#E5E7EB;color:#111827}
           </div>
         </div>
       </div>
-
       <button class="logout-btn" onclick="doLogout()">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign Out
@@ -745,156 +842,107 @@ html[data-theme="dark"] .toast{background:#E5E7EB;color:#111827}
     </button>
   </nav>
 
-</div><!-- #main-app -->
+</div>
+</div><!-- #main-app-wrapper -->
 
 <div class="toast" id="toast-el"></div>
 
 <script>
-/* ═══════════════════════════════
-   THEME
-═══════════════════════════════ */
-let isDark = localStorage.getItem('remindme_theme') === 'dark';
-function applyTheme() {
-  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
-  ['tog-dark-profile'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.checked = isDark;
-  });
-}
-function toggleTheme() {
-  isDark = !isDark;
-  localStorage.setItem('remindme_theme', isDark ? 'dark' : 'light');
-  applyTheme();
-  showToast(isDark ? '🌙 Dark mode on' : '☀️ Light mode on');
-}
-function applyThemeFromToggle(src) {
-  const id = src === 'profile' ? 'tog-dark-profile' : 'tog-dark-profile';
-  isDark = document.getElementById(id).checked;
-  localStorage.setItem('remindme_theme', isDark ? 'dark' : 'light');
-  applyTheme();
-  showToast(isDark ? '🌙 Dark mode on' : '☀️ Light mode on');
-}
+/* THEME */
+let isDark=localStorage.getItem('remindme_theme')==='dark';
+function applyTheme(){document.documentElement.setAttribute('data-theme',isDark?'dark':'');const el=document.getElementById('tog-dark-profile');if(el)el.checked=isDark}
+function toggleTheme(){isDark=!isDark;localStorage.setItem('remindme_theme',isDark?'dark':'light');applyTheme();showToast(isDark?'🌙 Dark mode on':'☀️ Light mode on')}
+function applyThemeFromToggle(){isDark=document.getElementById('tog-dark-profile').checked;localStorage.setItem('remindme_theme',isDark?'dark':'light');applyTheme();showToast(isDark?'🌙 Dark mode on':'☀️ Light mode on')}
 applyTheme();
 
-/* ═══════════════════════════════
-   AUTH STATE
-═══════════════════════════════ */
-let currentUser = JSON.parse(localStorage.getItem('remindme_user') || 'null');
+/* AUTH STATE */
+let currentUser=JSON.parse(localStorage.getItem('remindme_user')||'null');
 
-function showAuth(page) {
-  document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('auth-' + page).classList.add('active');
-  document.getElementById('auth-wrapper').style.display = 'block';
-  document.getElementById('main-app').style.display = 'none';
+function showAuth(page){
+  document.querySelectorAll('.auth-screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('auth-'+page).classList.add('active');
+  document.getElementById('auth-wrapper').style.display='block';
+  document.getElementById('auth-wrapper').classList.add('active');
+  document.getElementById('main-app-wrapper').style.display='none';
 }
 
-function showApp() {
-  document.getElementById('auth-wrapper').style.display = 'none';
-  document.getElementById('main-app').style.display = 'flex';
-  updateProfileUI();
-  renderHome();
-  renderCalendar();
-  renderReminders();
+function showApp(){
+  document.getElementById('auth-wrapper').style.display='none';
+  document.getElementById('auth-wrapper').classList.remove('active');
+  document.getElementById('main-app-wrapper').style.display='flex';
+  updateProfileUI();renderHome();renderCalendar();renderReminders();
 }
 
-function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
-  const errEl = document.getElementById('login-err');
+function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const errEl=document.getElementById('login-err');
   errEl.classList.remove('show');
-
-  if (!email || !pass) { errEl.textContent = 'Please fill in all fields.'; errEl.classList.add('show'); return; }
-
-  // Check stored user
-  const stored = JSON.parse(localStorage.getItem('remindme_registered') || '{}');
-  if (stored[email] && stored[email].pass === pass) {
-    currentUser = { name: stored[email].name, email, joinDate: stored[email].joinDate };
-    localStorage.setItem('remindme_user', JSON.stringify(currentUser));
-    showApp();
-    showToast('👋 Welcome back, ' + currentUser.name.split(' ')[0] + '!');
-  } else {
-    errEl.textContent = 'Invalid email or password. Try signing up!';
-    errEl.classList.add('show');
-  }
+  if(!email||!pass){errEl.textContent='Please fill in all fields.';errEl.classList.add('show');return}
+  const stored=JSON.parse(localStorage.getItem('remindme_registered')||'{}');
+  if(stored[email]&&stored[email].pass===pass){
+    currentUser={name:stored[email].name,email,joinDate:stored[email].joinDate};
+    localStorage.setItem('remindme_user',JSON.stringify(currentUser));
+    showApp();showToast('👋 Welcome back, '+currentUser.name.split(' ')[0]+'!');
+  }else{errEl.textContent='Invalid email or password. Try signing up!';errEl.classList.add('show')}
 }
 
-function doSignup() {
-  const name  = document.getElementById('signup-name').value.trim();
-  const email = document.getElementById('signup-email').value.trim();
-  const pass  = document.getElementById('signup-pass').value;
-  const pass2 = document.getElementById('signup-pass2').value;
-  const errEl = document.getElementById('signup-err');
+function doSignup(){
+  const name=document.getElementById('signup-name').value.trim();
+  const email=document.getElementById('signup-email').value.trim();
+  const pass=document.getElementById('signup-pass').value;
+  const pass2=document.getElementById('signup-pass2').value;
+  const errEl=document.getElementById('signup-err');
   errEl.classList.remove('show');
-
-  if (!name || !email || !pass || !pass2) { errEl.textContent = 'Please fill in all fields.'; errEl.classList.add('show'); return; }
-  if (pass.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.classList.add('show'); return; }
-  if (pass !== pass2) { errEl.textContent = 'Passwords do not match.'; errEl.classList.add('show'); return; }
-  if (!email.includes('@')) { errEl.textContent = 'Enter a valid email address.'; errEl.classList.add('show'); return; }
-
-  const stored = JSON.parse(localStorage.getItem('remindme_registered') || '{}');
-  if (stored[email]) { errEl.textContent = 'Account already exists. Please sign in.'; errEl.classList.add('show'); return; }
-
-  const joinDate = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  stored[email] = { name, pass, joinDate };
-  localStorage.setItem('remindme_registered', JSON.stringify(stored));
-
-  currentUser = { name, email, joinDate };
-  localStorage.setItem('remindme_user', JSON.stringify(currentUser));
-  showApp();
-  showToast('🎉 Account created! Welcome, ' + name.split(' ')[0] + '!');
+  if(!name||!email||!pass||!pass2){errEl.textContent='Please fill in all fields.';errEl.classList.add('show');return}
+  if(pass.length<6){errEl.textContent='Password must be at least 6 characters.';errEl.classList.add('show');return}
+  if(pass!==pass2){errEl.textContent='Passwords do not match.';errEl.classList.add('show');return}
+  if(!email.includes('@')){errEl.textContent='Enter a valid email address.';errEl.classList.add('show');return}
+  const stored=JSON.parse(localStorage.getItem('remindme_registered')||'{}');
+  if(stored[email]){errEl.textContent='Account already exists. Please sign in.';errEl.classList.add('show');return}
+  const joinDate=new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  stored[email]={name,pass,joinDate};
+  localStorage.setItem('remindme_registered',JSON.stringify(stored));
+  currentUser={name,email,joinDate};
+  localStorage.setItem('remindme_user',JSON.stringify(currentUser));
+  showApp();showToast('🎉 Welcome, '+name.split(' ')[0]+'!');
 }
 
-function googleAuth() {
-  // Simulate Google OAuth
-  currentUser = {
-    name: 'Google User',
-    email: 'user@gmail.com',
-    joinDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-  };
-  localStorage.setItem('remindme_user', JSON.stringify(currentUser));
-  showApp();
-  showToast('👋 Signed in with Google!');
+function googleAuth(){
+  currentUser={name:'Google User',email:'user@gmail.com',joinDate:new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})};
+  localStorage.setItem('remindme_user',JSON.stringify(currentUser));
+  showApp();showToast('👋 Signed in with Google!');
 }
 
-function doLogout() {
-  if (!confirm('Sign out of RemindMe?')) return;
-  localStorage.removeItem('remindme_user');
-  currentUser = null;
-  showAuth('login');
-  showToast('Signed out successfully');
+function doLogout(){
+  if(!confirm('Sign out of RemindMe?'))return;
+  localStorage.removeItem('remindme_user');currentUser=null;showAuth('login');showToast('Signed out successfully');
 }
 
-function updateProfileUI() {
-  if (!currentUser) return;
-  const initials = currentUser.name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('nav-avatar-btn').textContent = initials;
-  document.getElementById('profile-avatar-display').textContent = initials;
-  document.getElementById('profile-name-display').textContent = currentUser.name;
-  document.getElementById('profile-email-display').textContent = currentUser.email;
-  document.getElementById('profile-since-display').textContent = 'Member since ' + (currentUser.joinDate || 'today');
-  document.getElementById('hero-greeting').innerHTML = 'Hey ' + currentUser.name.split(' ')[0] + ',<br>Never Miss a Moment ✨';
-
-  // stats
-  const now = new Date();
-  document.getElementById('ps-total').textContent = events.length;
-  document.getElementById('ps-month').textContent = events.filter(e => new Date(e.date).getMonth() === now.getMonth()).length;
-  document.getElementById('ps-sent').textContent = events.reduce((s,e) => s + (e.sent||0), 0);
+function updateProfileUI(){
+  if(!currentUser)return;
+  const initials=currentUser.name.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('nav-avatar-btn').textContent=initials;
+  document.getElementById('profile-avatar-display').textContent=initials;
+  document.getElementById('profile-name-display').textContent=currentUser.name;
+  document.getElementById('profile-email-display').textContent=currentUser.email;
+  document.getElementById('profile-since-display').textContent='Member since '+(currentUser.joinDate||'today');
+  document.getElementById('hero-greeting').innerHTML='Hey '+currentUser.name.split(' ')[0]+',<br>Never Miss a Moment ✨';
+  const now=new Date();
+  document.getElementById('ps-total').textContent=events.length;
+  document.getElementById('ps-month').textContent=events.filter(e=>new Date(e.date).getMonth()===now.getMonth()).length;
+  document.getElementById('ps-sent').textContent=events.reduce((s,e)=>s+(e.sent||0),0);
 }
 
-function editProfile() {
-  const newName = prompt('Enter new display name:', currentUser ? currentUser.name : '');
-  if (!newName || !newName.trim()) return;
-  currentUser.name = newName.trim();
-  localStorage.setItem('remindme_user', JSON.stringify(currentUser));
-  updateProfileUI();
-  showToast('✅ Profile updated!');
+function editProfile(){
+  const newName=prompt('Enter new display name:',currentUser?currentUser.name:'');
+  if(!newName||!newName.trim())return;
+  currentUser.name=newName.trim();localStorage.setItem('remindme_user',JSON.stringify(currentUser));updateProfileUI();showToast('✅ Profile updated!');
 }
 
-/* ═══════════════════════════════
-   DATA
-═══════════════════════════════ */
-const STORE_KEY = 'remindme_events_v2';
-let events = JSON.parse(localStorage.getItem(STORE_KEY)) || [
+/* DATA */
+const STORE_KEY='remindme_events_v2';
+let events=JSON.parse(localStorage.getItem(STORE_KEY))||[
   {id:1,name:'Priya Rajan',rel:'Family',type:'Birthday',date:'2025-05-03',phone:'+91 98765 43210',email:'',notes:'Loves roses',days:1,sent:0},
   {id:2,name:'Arjun & Meera',rel:'Friend',type:'Anniversary',date:'2025-05-07',phone:'+91 87654 32100',email:'arjun@email.com',notes:'',days:2,sent:1},
   {id:3,name:'Rahul Kumar',rel:'Colleague',type:'Other',date:'2025-05-15',phone:'',email:'rahul@co.com',notes:'Office party',days:3,sent:0},
@@ -903,26 +951,20 @@ let events = JSON.parse(localStorage.getItem(STORE_KEY)) || [
   {id:6,name:'Meena & Raj',rel:'Family',type:'Anniversary',date:'2025-05-22',phone:'+91 90011 22334',email:'',notes:'25 years',days:3,sent:0},
   {id:7,name:'Kavya Singh',rel:'Friend',type:'Birthday',date:'2025-05-28',phone:'+91 88811 99900',email:'kavya@mail.com',notes:'',days:1,sent:0}
 ];
-function saveEvents() { localStorage.setItem(STORE_KEY, JSON.stringify(events)); }
+function saveEvents(){localStorage.setItem(STORE_KEY,JSON.stringify(events))}
 
-const NOW = new Date();
-let calYear = NOW.getFullYear(), calMonth = NOW.getMonth(), selDay = null, activeFilter = 'all';
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const AV_COLS = ['av-pk','av-bl','av-vl','av-gr','av-or'];
-const TYPE_STRIPE = {Birthday:'stripe-bday',Anniversary:'stripe-anni',Other:'stripe-other'};
-const TYPE_BADGE  = {Birthday:'badge-bday',Anniversary:'badge-anni',Other:'badge-other'};
-const DOT_CLS     = {Birthday:'cd-bday',Anniversary:'cd-anni',Other:'cd-other'};
-const DOT_COLOR   = {Birthday:'#EC4899',Anniversary:'#0EA5E9',Other:'#8B5CF6'};
+const NOW=new Date();
+let calYear=NOW.getFullYear(),calMonth=NOW.getMonth(),selDay=null,activeFilter='all';
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const AV_COLS=['av-pk','av-bl','av-vl','av-gr','av-or'];
+const TYPE_STRIPE={Birthday:'stripe-bday',Anniversary:'stripe-anni',Other:'stripe-other'};
+const TYPE_BADGE={Birthday:'badge-bday',Anniversary:'badge-anni',Other:'badge-other'};
+const DOT_CLS={Birthday:'cd-bday',Anniversary:'cd-anni',Other:'cd-other'};
+const DOT_COLOR={Birthday:'#EC4899',Anniversary:'#0EA5E9',Other:'#8B5CF6'};
 
 function initials(n){return n.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase()}
 function avClass(id){return AV_COLS[id%AV_COLS.length]}
-function daysUntil(dateStr){
-  const t=new Date();t.setHours(0,0,0,0);
-  const d=new Date(dateStr);
-  const nxt=new Date(t.getFullYear(),d.getMonth(),d.getDate());
-  const target=nxt>=t?nxt:new Date(t.getFullYear()+1,d.getMonth(),d.getDate());
-  return Math.round((target-t)/86400000);
-}
+function daysUntil(dateStr){const t=new Date();t.setHours(0,0,0,0);const d=new Date(dateStr);const nxt=new Date(t.getFullYear(),d.getMonth(),d.getDate());const target=nxt>=t?nxt:new Date(t.getFullYear()+1,d.getMonth(),d.getDate());return Math.round((target-t)/86400000)}
 function pillClass(n){if(n===0)return'pill-today';if(n<=7)return'pill-soon';return'pill-later'}
 function pillLabel(n){if(n===0)return'Today!';if(n===1)return'Tomorrow';return n+' days'}
 function fmtDate(s){const d=new Date(s);return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}
@@ -968,8 +1010,7 @@ function renderHome(){
   document.getElementById('stat-total').textContent=events.length;
   document.getElementById('stat-month').textContent=events.filter(e=>new Date(e.date).getMonth()===now.getMonth()).length;
   document.getElementById('stat-week').textContent=events.filter(e=>{const n=daysUntil(e.date);return n>=0&&n<=7}).length;
-  renderHomeList();
-  updateProfileUI();
+  renderHomeList();updateProfileUI();
 }
 function renderHomeList(){
   const sorted=[...events].sort((a,b)=>daysUntil(a.date)-daysUntil(b.date));
@@ -1065,14 +1106,8 @@ function switchTab(name){
 let toastTimer;
 function showToast(msg){const el=document.getElementById('toast-el');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2400)}
 
-/* ═══════════════════════════════
-   INIT
-═══════════════════════════════ */
-if (currentUser) {
-  showApp();
-} else {
-  showAuth('login');
-}
+/* INIT */
+if(currentUser){showApp()}else{showAuth('login')}
 
 setInterval(()=>{events.forEach(ev=>{const n=daysUntil(ev.date);if(n===ev.days){const today=new Date().toDateString();if(!ev._lastAlert||ev._lastAlert!==today){if('Notification'in window&&Notification.permission==='granted'){new Notification('RemindMe',{body:`${ev.name}'s ${ev.type} is ${n===0?'today':'in '+n+' day'+(n>1?'s':'')}!`,tag:'event-'+ev.id})}ev._lastAlert=today}}})},3600000);
 </script>
