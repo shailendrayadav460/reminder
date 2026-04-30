@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RemindMe - Birthday & Anniversary Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-soft: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .nav-tab:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: transparent;
+            box-shadow: var(--shadow);
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Container */
+        .form-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-secondary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* Event Cards */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .event-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border-left: 5px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--gradient-primary);
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .event-card.birthday::before {
+            background: var(--gradient-secondary);
+        }
+
+        .event-card.anniversary::before {
+            background: var(--gradient-success);
+        }
+
+        .event-card.other::before {
+            background: var(--gradient-soft);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .event-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .event-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .event-details {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        .event-date {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.05rem;
+            margin: 10px 0;
+        }
+
+        .event-countdown {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Reminder Status */
+        .reminder-status {
+            background: var(--gradient-success);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .reminder-status.pending {
+            background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+        }
+
+        .reminder-status.sent {
+            background: var(--gradient-success);
+        }
+
+        /* Settings */
+        .settings-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            border-radius: 30px;
+            transition: 0.4s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: 0.4s;
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background: var(--gradient-primary);
+        }
+
+        .toggle input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Notification Banner */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--gradient-success);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-hover);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .nav-tab {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎉 RemindMe</h1>
+            <p>Never miss a birthday, anniversary, or special moment</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="showSection('add-event')">➕ Add Event</div>
+            <div class="nav-tab" onclick="showSection('all-events')">📅 All Events</div>
+            <div class="nav-tab" onclick="showSection('reminders')">🔔 Reminders</div>
+            <div class="nav-tab" onclick="showSection('settings')">⚙️ Settings</div>
+        </div>
+
+        <!-- Add Event Section -->
+        <div id="add-event" class="section active">
+            <div class="form-card">
+                <h2 style="margin-bottom: 25px;">Add New Event</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="personName">Person Name *</label>
+                        <input type="text" id="personName" placeholder="e.g., John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="relationship">Relationship *</label>
+                        <select id="relationship" required>
+                            <option value="">Select relationship</option>
+                            <option value="Family">Family</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Friend of Family">Friend of Family</option>
+                            <option value="Friend of Friend">Friend of Friend</option>
+                            <option value="Colleague">Colleague</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventType">Event Type *</label>
+                        <select id="eventType" required>
+                            <option value="">Select event type</option>
+                            <option value="Birthday">Birthday</option>
+                            <option value="Anniversary">Anniversary</option>
+                            <option value="Other">Other Celebration</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventDate">Date *</label>
+                        <input type="date" id="eventDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number (with country code)</label>
+                        <input type="tel" id="phoneNumber" placeholder="+91 98765 43210">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" placeholder="john@example.com">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="notes">Notes (Optional)</label>
+                    <textarea id="notes" rows="3" placeholder="Gift ideas, preferences, etc."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="reminderDays">Send Reminder (days before)</label>
+                    <input type="number" id="reminderDays" value="1" min="0" max="30">
+                </div>
+                <button class="btn btn-primary" onclick="addEvent()">Add Event</button>
+            </div>
+        </div>
+
+        <!-- All Events Section -->
+        <div id="all-events" class="section">
+            <div id="eventsContainer" class="events-grid"></div>
+            <div id="emptyState" class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3>No Events Yet</h3>
+                <p>Start adding birthdays and anniversaries to never miss a special day!</p>
+            </div>
+        </div>
+
+        <!-- Reminders Section -->
+        <div id="reminders" class="section">
+            <div id="remindersContainer"></div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings" class="section">
+            <div class="settings-card">
+                <h2 style="margin-bottom: 20px;">Notification Settings</h2>
+                <div class="settings-item">
+                    <div>
+                        <strong>Enable Notifications</strong>
+                        <p style="color: var(--text-light); font-size: 0.9rem;">Receive browser notifications for upcoming events</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="enableNotifications" onchange="toggleNotifications()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <div>
+                        <strong>Auto-send Messages</strong>
+                        <p style="color: var(--text-light); font-size: 0.9rem;">Automatically send greetings if reminder is dismissed</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="autoSendMessages" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <div>
+                        <strong>Message Retry Count</strong>
+                        <p style="color: var(--text-light); font-size: 0.9rem;">Number of times to retry sending message</p>
+                    </div>
+                    <input type="number" id="retryCount" value="3" min="1" max="5" style="width: 80px; padding: 8px; border: 2px solid var(--border); border-radius: 8px;">
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h2 style="margin-bottom: 20px;">n8n Webhook Configuration</h2>
+                <div class="form-group">
+                    <label for="webhookUrl">n8n Webhook URL</label>
+                    <input type="url" id="webhookUrl" placeholder="https://your-n8n-instance.com/webhook/reminder">
+                </div>
+                <button class="btn btn-success" style="margin-top: 15px;" onclick="saveSettings()">Save Settings</button>
+            </div>
+
+            <div class="settings-card">
+                <h2 style="margin-bottom: 20px;">Data Management</h2>
+                <button class="btn btn-secondary" onclick="exportData()">Export All Data</button>
+                <button class="btn btn-delete" style="margin-left: 10px;" onclick="clearAllData()">Clear All Data</button>
+            </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script>
+        // Local Storage Keys
+        const STORAGE_KEYS = {
+            EVENTS: 'reminder_events',
+            SETTINGS: 'reminder_settings',
+            REMINDERS: 'active_reminders'
+        };
+
+        // Initialize app
+        let events = JSON.parse(localStorage.getItem(STORAGE_KEYS.EVENTS)) || [];
+        let settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || {
+            notificationsEnabled: false,
+            autoSendMessages: true,
+            retryCount: 3,
+            webhookUrl: ''
+        };
+
+        // Load settings on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            displayEvents();
+            checkUpcomingReminders();
+            // Check reminders every hour
+            setInterval(checkUpcomingReminders, 3600000);
+        });
+
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (sectionId === 'all-events') {
+                displayEvents();
+            } else if (sectionId === 'reminders') {
+                displayReminders();
+            }
+        }
+
+        // Add Event
+        function addEvent() {
+            const personName = document.getElementById('personName').value;
+            const relationship = document.getElementById('relationship').value;
+            const eventType = document.getElementById('eventType').value;
+            const eventDate = document.getElementById('eventDate').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const email = document.getElementById('email').value;
+            const notes = document.getElementById('notes').value;
+            const reminderDays = parseInt(document.getElementById('reminderDays').value);
+
+            if (!personName || !relationship || !eventType || !eventDate) {
+                showNotification('Please fill in all required fields!', 'error');
+                return;
+            }
+
+            const event = {
+                id: Date.now(),
+                personName,
+                relationship,
+                eventType,
+                eventDate,
+                phoneNumber,
+                email,
+                notes,
+                reminderDays,
+                createdAt: new Date().toISOString(),
+                remindersSent: 0,
+                lastReminderSent: null
+            };
+
+            events.push(event);
+            localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+
+            // Clear form
+            document.getElementById('personName').value = '';
+            document.getElementById('relationship').value = '';
+            document.getElementById('eventType').value = '';
+            document.getElementById('eventDate').value = '';
+            document.getElementById('phoneNumber').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('notes').value = '';
+            document.getElementById('reminderDays').value = '1';
+
+            showNotification('Event added successfully! 🎉');
+            showSection('all-events');
+        }
+
+        // Display Events
+        function displayEvents() {
+            const container = document.getElementById('eventsContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (events.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            // Sort events by date
+            const sortedEvents = [...events].sort((a, b) => {
+                return new Date(a.eventDate) - new Date(b.eventDate);
+            });
+
+            container.innerHTML = sortedEvents.map(event => {
+                const daysUntil = calculateDaysUntil(event.eventDate);
+                const typeClass = event.eventType.toLowerCase().replace(/\s+/g, '-');
+                
+                return `
+                    <div class="event-card ${typeClass}">
+                        <div class="event-header">
+                            <div>
+                                <div class="event-title">${event.personName}</div>
+                                <div class="event-type">${event.eventType}</div>
+                            </div>
+                        </div>
+                        <div class="event-details">👥 ${event.relationship}</div>
+                        <div class="event-date">📅 ${formatDate(event.eventDate)}</div>
+                        ${event.phoneNumber ? `<div class="event-details">📱 ${event.phoneNumber}</div>` : ''}
+                        ${event.email ? `<div class="event-details">✉️ ${event.email}</div>` : ''}
+                        ${event.notes ? `<div class="event-details" style="margin-top: 10px;">📝 ${event.notes}</div>` : ''}
+                        <div class="event-countdown">
+                            ${daysUntil > 0 ? `${daysUntil} days remaining` : 
+                              daysUntil === 0 ? 'Today! 🎉' : 
+                              `Passed ${Math.abs(daysUntil)} days ago`}
+                        </div>
+                        ${event.remindersSent > 0 ? `<div class="reminder-status sent">✓ ${event.remindersSent} reminder(s) sent</div>` : ''}
+                        <div class="event-actions">
+                            <button class="btn btn-success" style="flex: 1;" onclick="sendGreeting(${event.id})">Send Greeting</button>
+                            <button class="btn btn-delete" onclick="deleteEvent(${event.id})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Calculate days until event
+        function calculateDaysUntil(eventDate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const eventDateObj = new Date(eventDate);
+            eventDateObj.setHours(0, 0, 0, 0);
+            
+            // Get this year's occurrence
+            const thisYearEvent = new Date(today.getFullYear(), eventDateObj.getMonth(), eventDateObj.getDate());
+            
+            // If it's passed this year, check next year
+            const targetDate = thisYearEvent >= today ? thisYearEvent : 
+                new Date(today.getFullYear() + 1, eventDateObj.getMonth(), eventDateObj.getDate());
+            
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            return diffDays;
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+        }
+
+        // Delete Event
+        function deleteEvent(id) {
+            if (confirm('Are you sure you want to delete this event?')) {
+                events = events.filter(event => event.id !== id);
+                localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+                displayEvents();
+                showNotification('Event deleted successfully');
+            }
+        }
+
+        // Send Greeting
+        async function sendGreeting(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+
+            const messageData = {
+                eventId: event.id,
+                personName: event.personName,
+                eventType: event.eventType,
+                eventDate: event.eventDate,
+                phoneNumber: event.phoneNumber,
+                email: event.email,
+                message: generateGreetingMessage(event),
+                attempt: 1,
+                maxAttempts: settings.retryCount
+            };
+
+            await sendToWebhook(messageData);
+            
+            // Update event
+            event.remindersSent = (event.remindersSent || 0) + 1;
+            event.lastReminderSent = new Date().toISOString();
+            localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+            
+            displayEvents();
+            showNotification(`Greeting sent to ${event.personName}! 🎉`);
+        }
+
+        // Generate greeting message
+        function generateGreetingMessage(event) {
+            const messages = {
+                Birthday: `🎂 Happy Birthday ${event.personName}! Wishing you a wonderful day filled with joy and happiness! 🎉`,
+                Anniversary: `💝 Happy Anniversary ${event.personName}! Wishing you many more years of love and happiness! 🥂`,
+                Other: `🎊 Wishing ${event.personName} a very special day! 🎉`
+            };
+            return messages[event.eventType] || messages.Other;
+        }
+
+        // Check upcoming reminders
+        function checkUpcomingReminders() {
+            events.forEach(event => {
+                const daysUntil = calculateDaysUntil(event.eventDate);
+                
+                // Check if we should send a reminder
+                if (daysUntil === event.reminderDays) {
+                    const today = new Date().toDateString();
+                    const lastSent = event.lastReminderSent ? new Date(event.lastReminderSent).toDateString() : null;
+                    
+                    // Don't send multiple reminders on the same day
+                    if (lastSent !== today) {
+                        sendReminder(event);
+                    }
+                }
+            });
+        }
+
+        // Send reminder notification
+        function sendReminder(event) {
+            if (settings.notificationsEnabled && 'Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        const daysText = event.reminderDays === 0 ? 'Today' : 
+                                        event.reminderDays === 1 ? 'Tomorrow' : 
+                                        `in ${event.reminderDays} days`;
+                        
+                        new Notification('Upcoming Event Reminder', {
+                            body: `${event.personName}'s ${event.eventType} is ${daysText}!`,
+                            icon: '🎉',
+                            tag: `event-${event.id}`
+                        });
+                    }
+                });
+            }
+
+            // Store active reminder
+            const activeReminders = JSON.parse(localStorage.getItem(STORAGE_KEYS.REMINDERS)) || [];
+            activeReminders.push({
+                eventId: event.id,
+                sentAt: new Date().toISOString(),
+                dismissed: false
+            });
+            localStorage.setItem(STORAGE_KEYS.REMINDERS, JSON.stringify(activeReminders));
+        }
+
+        // Display reminders
+        function displayReminders() {
+            const container = document.getElementById('remindersContainer');
+            const activeReminders = JSON.parse(localStorage.getItem(STORAGE_KEYS.REMINDERS)) || [];
+            
+            const upcomingEvents = events.filter(event => {
+                const daysUntil = calculateDaysUntil(event.eventDate);
+                return daysUntil >= 0 && daysUntil <= 30;
+            }).sort((a, b) => calculateDaysUntil(a.eventDate) - calculateDaysUntil(b.eventDate));
+
+            if (upcomingEvents.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Upcoming Events</h3>
+                        <p>All clear for the next 30 days!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="form-card">
+                    <h2 style="margin-bottom: 20px;">Upcoming Events (Next 30 Days)</h2>
+                    ${upcomingEvents.map(event => {
+                        const daysUntil = calculateDaysUntil(event.eventDate);
+                        return `
+                            <div style="padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>${event.personName}</strong> - ${event.eventType}
+                                    <div style="color: var(--text-light); font-size: 0.9rem;">
+                                        ${formatDate(event.eventDate)} (${daysUntil === 0 ? 'Today!' : daysUntil + ' days'})
+                                    </div>
+                                </div>
+                                <button class="btn btn-success" onclick="sendGreeting(${event.id})">Send Now</button>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // Send to n8n webhook
+        async function sendToWebhook(data) {
+            if (!settings.webhookUrl) {
+                console.log('No webhook URL configured');
+                return;
+            }
+
+            try {
+                const response = await fetch(settings.webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Webhook request failed');
+                }
+
+                console.log('Successfully sent to webhook');
+            } catch (error) {
+                console.error('Error sending to webhook:', error);
+            }
+        }
+
+        // Toggle notifications
+        function toggleNotifications() {
+            const enabled = document.getElementById('enableNotifications').checked;
+            
+            if (enabled && 'Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        settings.notificationsEnabled = true;
+                        showNotification('Notifications enabled!');
+                    } else {
+                        document.getElementById('enableNotifications').checked = false;
+                        showNotification('Please allow notifications in your browser settings', 'error');
+                    }
+                });
+            } else {
+                settings.notificationsEnabled = false;
+            }
+            
+            saveSettings();
+        }
+
+        // Save settings
+        function saveSettings() {
+            settings.autoSendMessages = document.getElementById('autoSendMessages').checked;
+            settings.retryCount = parseInt(document.getElementById('retryCount').value);
+            settings.webhookUrl = document.getElementById('webhookUrl').value;
+            
+            localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+            showNotification('Settings saved successfully!');
+        }
+
+        // Load settings
+        function loadSettings() {
+            document.getElementById('enableNotifications').checked = settings.notificationsEnabled;
+            document.getElementById('autoSendMessages').checked = settings.autoSendMessages;
+            document.getElementById('retryCount').value = settings.retryCount;
+            document.getElementById('webhookUrl').value = settings.webhookUrl;
+        }
+
+        // Export data
+        function exportData() {
+            const dataStr = JSON.stringify({ events, settings }, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `remindme-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            showNotification('Data exported successfully!');
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure? This will delete all events and settings!')) {
+                localStorage.clear();
+                events = [];
+                settings = {
+                    notificationsEnabled: false,
+                    autoSendMessages: true,
+                    retryCount: 3,
+                    webhookUrl: ''
+                };
+                displayEvents();
+                loadSettings();
+                showNotification('All data cleared');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification show';
+            
+            if (type === 'error') {
+                notification.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)';
+            } else {
+                notification.style.background = 'var(--gradient-success)';
+            }
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
