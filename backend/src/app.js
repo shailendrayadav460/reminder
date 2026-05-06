@@ -3,6 +3,15 @@ const passport = require("passport");
 const cors = require("cors");
 
 const app = express();
+const fs = require("fs");
+const path = require("path");
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, "../uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 
 // CORS — allow React dev server
 app.use(cors({
@@ -24,7 +33,6 @@ app.use("/api/events", eventRoutes);
 app.use("/api/profile", profileRoutes);
 
 // Serve uploads
-const path = require("path");
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Health check
