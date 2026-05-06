@@ -13,9 +13,9 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 
-// CORS — allow React dev server
+// CORS — allow frontend (reflecting origin for live environments)
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:3000"],
+  origin: true,
   credentials: true,
 }));
 
